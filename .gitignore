@@ -1,0 +1,9 @@
+# Ignore dependency directory
+node_modules/
+
+# Ignore logs
+coverage/
+*.log
+
+# Ignore optional eslint cache
+.eslintcache

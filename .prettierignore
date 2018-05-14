@@ -1,0 +1,8 @@
+# Ignore dependency directory
+node_modules/
+
+# Ignore generated bundles
+dist/
+
+# Ignore logs
+coverage/

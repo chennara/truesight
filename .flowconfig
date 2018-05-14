@@ -1,0 +1,16 @@
+[ignore]
+.*/test/.*
+
+[include]
+
+[libs]
+
+[lints]
+
+[options]
+module.name_mapper='^\(.*\)$' -> '<PROJECT_ROOT>/packages/truesight/src/\1'
+
+[strict]
+
+[version]
+^0.71.0

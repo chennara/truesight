@@ -1,0 +1,16 @@
+{
+  "name": "truesight",
+  "version": "0.1.0-alpha.1",
+  "description": "Visualizing color in storytelling.",
+  "author": "Chennara Nhes",
+  "license": "MIT",
+  "main": "dist/truesight.common.js",
+  "module": "dist/truesight.esm.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chennara/truesight.git"
+  },
+  "dependencies": {
+    "hsluv": "^0.0.3"
+  }
+}
