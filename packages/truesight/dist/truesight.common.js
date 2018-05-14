@@ -472,11 +472,11 @@ var HSLuvColor = function () {
   return HSLuvColor;
 }();
 
-// Index for accessing the hue channel in a HSLuvColor object.
+// Index for accessing the hue channel in an HSLuvColor object.
 var HUE_CHANNEL_INDEX = 0;
-// Index for accessing the saturation channel in a HSLuvColor object.
+// Index for accessing the saturation channel in an HSLuvColor object.
 var SATURATION_CHANNEL_INDEX = 1;
-// Index for accessing the lightness channel in a HSLuvColor object.
+// Index for accessing the lightness channel in an HSLuvColor object.
 var LIGHTNESS_CHANNEL_INDEX = 2;
 
 // 
@@ -937,7 +937,7 @@ var HSLuvImage = function () {
 // ImageElementConfiguration object in which the properties have already been validated.
 
 
-// Defines the region size in terms of the interval lengths for each of the channels in a HSLuvColor object.
+// Defines the region size in terms of the interval lengths for each of the channels in an HSLuvColor object.
 
 
 // Defines the default region size dimensions for the popularity algorithm.

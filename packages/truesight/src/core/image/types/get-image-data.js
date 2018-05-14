@@ -1,6 +1,6 @@
 // @flow
 
-import type { ImageElement } from 'core/image/image-element';
+import type { ImageElement } from 'core/image/types/image-element';
 
 export default function getImageData(imageElement: ImageElement): Uint8ClampedArray {
   if (imageElement instanceof HTMLImageElement) {

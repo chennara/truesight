@@ -42,9 +42,9 @@ export class HSLuvColor {
   }
 }
 
-// Index for accessing the hue channel in a HSLuvColor object.
+// Index for accessing the hue channel in an HSLuvColor object.
 export const HUE_CHANNEL_INDEX: 0 = 0;
-// Index for accessing the saturation channel in a HSLuvColor object.
+// Index for accessing the saturation channel in an HSLuvColor object.
 export const SATURATION_CHANNEL_INDEX: 1 = 1;
-// Index for accessing the lightness channel in a HSLuvColor object.
+// Index for accessing the lightness channel in an HSLuvColor object.
 export const LIGHTNESS_CHANNEL_INDEX: 2 = 2;

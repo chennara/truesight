@@ -1,8 +1,8 @@
 // @flow
 
-import type { ValidatedQuantizationParameters } from 'core/quantz/types';
+import type { ValidatedQuantizationParameters } from 'core/image/quantz/types';
 import type { Try } from 'utils/fp/neither';
-import validateQuantizationParameters from 'core/quantz/utils/validate-parameters';
+import validateQuantizationParameters from 'core/image/quantz/utils/validate-parameters';
 
 import type { PopularityParameters, ValidatedPopularityParameters } from './types';
 import { DEFAULT_REGION_SIZE } from './types';

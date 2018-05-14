@@ -5,7 +5,7 @@ import type {
   ImageElementConfiguration as ImageElementBaseConfiguration,
   ValidatedRGBImageConfiguration as ValidatedRGBImageBaseConfiguration,
   ValidatedImageElementConfiguration as ValidatedImageElementBaseConfiguration,
-} from 'core/quantz/types';
+} from 'core/image/quantz/types';
 
 // Used for configuring the popularity algorithm.
 export type PopularityParameters = RGBImageConfiguration | ImageElementConfiguration;
@@ -37,7 +37,7 @@ export type ValidatedImageElementConfiguration = {|
   regionSize: RegionSize,
 |};
 
-// Defines the region size in terms of the interval lengths for each of the channels in a HSLuvColor object.
+// Defines the region size in terms of the interval lengths for each of the channels in an HSLuvColor object.
 export type RegionSize = [number, number, number];
 
 // Defines the default region size dimensions for the popularity algorithm.

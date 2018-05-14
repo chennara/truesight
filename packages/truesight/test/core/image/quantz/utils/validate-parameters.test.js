@@ -1,5 +1,5 @@
-import { VALID_QUALITIES, DEFAULT_NUMBER_OF_COLORS, DEFAULT_QUALITY } from 'core/quantz/types';
-import validateParameters from 'core/quantz/utils/validate-parameters';
+import { VALID_QUALITIES, DEFAULT_NUMBER_OF_COLORS, DEFAULT_QUALITY } from 'core/image/quantz/types';
+import validateParameters from 'core/image/quantz/utils/validate-parameters';
 
 import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image';
 

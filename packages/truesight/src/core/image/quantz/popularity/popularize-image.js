@@ -1,7 +1,7 @@
 // @flow
 
 import type { Try } from 'utils/fp/neither';
-import { HSLuvImage } from 'core/image/hsluv-image';
+import { HSLuvImage } from 'core/image/types/hsluv-image';
 import { HSLuvColor } from 'core/color/hsluv-color';
 import { RGBColor } from 'core/color/rgb-color';
 

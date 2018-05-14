@@ -5,10 +5,10 @@ import type {
   RGBImageConfiguration,
   ImageElementConfiguration,
   ValidatedQuantizationParameters,
-} from 'core/quantz/types';
+} from 'core/image/quantz/types';
 import type { Try } from 'utils/fp/neither';
-import { RGBImage } from 'core/image/rgb-image';
-import { VALID_QUALITIES, DEFAULT_QUALITY, DEFAULT_NUMBER_OF_COLORS } from 'core/quantz/types';
+import { RGBImage } from 'core/image/types/rgb-image';
+import { VALID_QUALITIES, DEFAULT_QUALITY, DEFAULT_NUMBER_OF_COLORS } from 'core/image/quantz/types';
 
 export default function validateParameters(parameters: QuantizationParameters): Try<ValidatedQuantizationParameters> {
   if (!parameters.rgbImage && !parameters.imageElement) {

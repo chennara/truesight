@@ -1,10 +1,10 @@
 // @flow
 
-import type { QuantizationParameters, ValidatedQuantizationParameters } from 'core/quantz/types';
+import type { QuantizationParameters, ValidatedQuantizationParameters } from 'core/image/quantz/types';
 import type { Try } from 'utils/fp/neither';
-import { RGBImage } from 'core/image/rgb-image';
+import { RGBImage } from 'core/image/types/rgb-image';
 import { RGBColor, RED_CHANNEL_INDEX, GREEN_CHANNEL_INDEX, BLUE_CHANNEL_INDEX } from 'core/color/rgb-color';
-import validateParameters from 'core/quantz/utils/validate-parameters';
+import validateParameters from 'core/image/quantz/utils/validate-parameters';
 
 // Maps each color in the image to its representative color.
 export type InverseColorMap = {|

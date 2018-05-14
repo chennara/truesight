@@ -1,7 +1,7 @@
 // @flow
 
-import type { ImageElement } from 'core/image/image-element';
-import { RGBImage } from 'core/image/rgb-image';
+import type { ImageElement } from 'core/image/types/image-element';
+import { RGBImage } from 'core/image/types/rgb-image';
 
 // Used for configuring a color quantization algorithm.
 export type QuantizationParameters = RGBImageConfiguration | ImageElementConfiguration;

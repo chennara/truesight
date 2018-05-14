@@ -1,5 +1,5 @@
 import { RGBColor } from 'core/color/rgb-color';
-import popularize from 'core/quantz/popularity/popularize-image';
+import popularize from 'core/image/quantz/popularity/popularize-image';
 
 import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image';
 import drawImageToCanvas from '../test-utils/draw-image-to-canvas';

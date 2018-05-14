@@ -1,5 +1,5 @@
-import { DEFAULT_REGION_SIZE } from 'core/quantz/popularity/types';
-import validateParameters from 'core/quantz/popularity/validate-parameters';
+import { DEFAULT_REGION_SIZE } from 'core/image/quantz/popularity/types';
+import validateParameters from 'core/image/quantz/popularity/validate-parameters';
 
 describe('popularize should return an error if invalid parameters were provided', () => {
   it('should return a RangeError if regionSize is not of type [number, number, number]', () => {

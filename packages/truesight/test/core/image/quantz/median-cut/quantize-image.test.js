@@ -1,5 +1,5 @@
 import { RGBColor } from 'core/color/rgb-color';
-import { quantize, reduce } from 'core/quantz/median-cut/quantize-image';
+import { quantize, reduce } from 'core/image/quantz/median-cut/quantize-image';
 
 import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image';
 import drawImageToCanvas from '../test-utils/draw-image-to-canvas';

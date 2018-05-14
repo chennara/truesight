@@ -1,5 +1,5 @@
 import { HSLuvColor } from 'core/color/hsluv-color';
-import mapColorToRegionID from 'core/quantz/popularity/map-color-to-region-id';
+import mapColorToRegionID from 'core/image/quantz/popularity/map-color-to-region-id';
 
 describe('should map a color to the correct region in the popularity algorithm', () => {
   it('should map [0, 0, 0] to the first region', () => {

@@ -1,4 +1,4 @@
-import { RGBImage } from 'core/image/rgb-image';
+import { RGBImage } from 'core/image/types/rgb-image';
 import { RGBColor } from 'core/color/rgb-color';
 
 export default function createRandomizedRGBImage(imageSize) {
