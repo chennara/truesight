@@ -1,7 +1,15 @@
 {
-  "plugins": ["transform-object-rest-spread"],
   "presets": [
-    ["env", { "modules": false }],
+    [
+      "env",
+      {
+        "modules": false,
+        "targets": {
+          "browsers": ["last 2 Chrome versions"]
+        }
+      }
+    ],
     "flow"
-  ]
+  ],
+  "plugins": ["transform-object-rest-spread", "external-helpers"]
 }

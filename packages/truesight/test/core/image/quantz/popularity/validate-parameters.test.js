@@ -74,7 +74,7 @@ describe('popularize should return an error if invalid parameters were provided'
 });
 
 describe('should provide the correct default values for the popularity algorithm', () => {
-  it('should provide the default value for hue in regionSize if not present', () => {
+  it('should provide the default value for hue in regionSize if it was not provided', () => {
     const validatedParameters = validateParameters({
       imageElement: new window.Image(),
     });

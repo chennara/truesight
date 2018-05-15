@@ -37,7 +37,7 @@ export type ValidatedImageElementConfiguration = {|
   regionSize: RegionSize,
 |};
 
-// Defines the region size in terms of the interval lengths for each of the channels in an HSLuvColor object.
+// Defines the region size in terms of interval lengths for each of the channels in an HSLuvColor object.
 export type RegionSize = [number, number, number];
 
 // Defines the default region size dimensions for the popularity algorithm.

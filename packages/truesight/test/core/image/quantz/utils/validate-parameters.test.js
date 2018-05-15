@@ -75,7 +75,7 @@ describe('should return an error if invalid quantization parameters were provide
 describe('should provide the correct default values for color quantization', () => {
   const rgbImage = createRandomizedRGBImage(2 ** 10);
 
-  it('should provide the default value for numberOfColors if not present', () => {
+  it('should provide the default value for numberOfColors if it was not provided', () => {
     const validatedParameters = validateParameters({
       rgbImage,
     });
@@ -84,7 +84,7 @@ describe('should provide the correct default values for color quantization', () 
     expect(validatedParameters).to.have.property('numberOfColors', DEFAULT_NUMBER_OF_COLORS);
   });
 
-  it('should provide the default value for quality if not present', () => {
+  it('should provide the default value for quality if it was not provided', () => {
     const validatedParameters = validateParameters({
       rgbImage,
     });

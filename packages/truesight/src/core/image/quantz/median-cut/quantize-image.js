@@ -1,7 +1,6 @@
 // @flow
 
 import type { QuantizationParameters, ValidatedQuantizationParameters } from 'core/image/quantz/types';
-import type { Try } from 'utils/fp/neither';
 import { RGBImage } from 'core/image/types/rgb-image';
 import { RGBColor, RED_CHANNEL_INDEX, GREEN_CHANNEL_INDEX, BLUE_CHANNEL_INDEX } from 'core/color/rgb-color';
 import validateParameters from 'core/image/quantz/utils/validate-parameters';
@@ -24,28 +23,28 @@ type Vbox = RGBColor[];
 // Enum for safely accessing a channel in a RGBColor object.
 type RGBIndex = typeof RED_CHANNEL_INDEX | typeof GREEN_CHANNEL_INDEX | typeof BLUE_CHANNEL_INDEX;
 
-export function quantize(parameters: QuantizationParameters): Try<InverseColorMap> {
+export function quantize(parameters: QuantizationParameters): Promise<InverseColorMap> {
   return runMedianCut(parameters, buildInverseColorMap);
 }
 
-export function reduce(parameters: QuantizationParameters): Try<ColorPalette> {
+export function reduce(parameters: QuantizationParameters): Promise<ColorPalette> {
   return runMedianCut(parameters, buildColorPalette);
 }
 
-function runMedianCut<T>(parameters: QuantizationParameters, buildMap: (Vbox[]) => T): Try<T> {
+async function runMedianCut<T>(parameters: QuantizationParameters, buildMap: (Vbox[]) => T): Promise<T> {
   const validatedParameters = validateParameters(parameters);
   if (validatedParameters instanceof Error) {
-    return validatedParameters;
+    return Promise.reject(validatedParameters);
   }
 
-  const rgbImage = extractRGBImage(validatedParameters);
+  const rgbImage = await extractRGBImage(validatedParameters);
   const vboxes = findMostDominantColors(rgbImage, validatedParameters.numberOfColors);
   const resultingMap = buildMap(vboxes);
 
   return resultingMap;
 }
 
-function extractRGBImage(parameters: ValidatedQuantizationParameters): RGBImage {
+async function extractRGBImage(parameters: ValidatedQuantizationParameters): Promise<RGBImage> {
   return parameters.rgbImage
     ? parameters.rgbImage
     : RGBImage.fromImageElement(parameters.imageElement, parameters.quality);

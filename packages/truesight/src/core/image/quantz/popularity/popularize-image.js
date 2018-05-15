@@ -1,6 +1,5 @@
 // @flow
 
-import type { Try } from 'utils/fp/neither';
 import { HSLuvImage } from 'core/image/types/hsluv-image';
 import { HSLuvColor } from 'core/color/hsluv-color';
 import { RGBColor } from 'core/color/rgb-color';
@@ -24,13 +23,13 @@ type ImageHistogram = [string, RegionHistogram][];
 // Maps a color to the number of pixels with that specific color within a specific region.
 type RegionHistogram = [string, number][];
 
-export default function popularize(parameters: PopularityParameters): Try<ColorPalette> {
+export default async function popularize(parameters: PopularityParameters): Promise<ColorPalette> {
   const validatedParameters = validateParameters(parameters);
   if (validatedParameters instanceof Error) {
-    return validatedParameters;
+    return Promise.reject(validatedParameters);
   }
 
-  const hsluvImage = extractHSLuvImage(validatedParameters);
+  const hsluvImage = await extractHSLuvImage(validatedParameters);
   const colorPalette = buildColorPalette(
     hsluvImage,
     validatedParameters.regionSize,
@@ -40,7 +39,7 @@ export default function popularize(parameters: PopularityParameters): Try<ColorP
   return colorPalette;
 }
 
-function extractHSLuvImage(parameters: ValidatedPopularityParameters): HSLuvImage {
+async function extractHSLuvImage(parameters: ValidatedPopularityParameters): Promise<HSLuvImage> {
   return parameters.rgbImage
     ? HSLuvImage.fromRGBImage(parameters.rgbImage, parameters.quality)
     : HSLuvImage.fromImageElement(parameters.imageElement, parameters.quality);

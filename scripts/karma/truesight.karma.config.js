@@ -41,7 +41,7 @@ module.exports = (config) => {
         }),
         babel({
           exclude: nodeModulesGlob,
-          plugins: ['external-helpers', 'istanbul'],
+          plugins: ['istanbul'],
         }),
       ],
     },
