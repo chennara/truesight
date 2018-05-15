@@ -5,7 +5,7 @@ import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image'
 import drawImageToCanvas from '../test-utils/draw-image-to-canvas';
 import checkIfSimilarColors from '../test-utils/check-if-similar-colors';
 
-describe('median-cut should return a map holding the expected number of colors (RGBImage)', () => {
+describe('median cut should return a map holding the expected number of colors (RGBImage)', () => {
   const imageSize = 2 ** 10;
   const rgbImage = createRandomizedRGBImage(imageSize);
 
@@ -22,7 +22,7 @@ describe('median-cut should return a map holding the expected number of colors (
   runExpectedNumberOfColorsTests(testSuite);
 });
 
-describe('median-cut should return a map holding the expected number of colors (HTMLImageElement)', () => {
+describe('median cut should return a map holding the expected number of colors (HTMLImageElement)', () => {
   const imageSize = 674 * 1000;
   const imageElement = new window.Image();
   imageElement.src = 'base/test/resources/images/baby-driver_2017.jpg';
@@ -40,7 +40,7 @@ describe('median-cut should return a map holding the expected number of colors (
   runExpectedNumberOfColorsTests(testSuite);
 });
 
-describe('median-cut should return a map holding the expected number of colors (HTMLCanvasElement)', () => {
+describe('median cut should return a map holding the expected number of colors (HTMLCanvasElement)', () => {
   const imageSize = 675 * 1000;
   const canvasElement = document.createElement('canvas');
 
@@ -99,7 +99,7 @@ function runExpectedNumberOfColorsTests(testSuite) {
   });
 }
 
-describe('median-cut should return an error if invalid quantization parameters were provided', () => {
+describe('median cut should return an error if invalid parameters were provided', () => {
   it('should return a TypeError if image is not of type RGBImage', async () => {
     let errorOccurred = false;
 

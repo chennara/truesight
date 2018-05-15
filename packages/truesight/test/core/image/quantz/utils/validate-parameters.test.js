@@ -3,7 +3,7 @@ import validateParameters from 'core/image/quantz/utils/validate-parameters';
 
 import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image';
 
-describe('should return an error if invalid quantization parameters were provided', () => {
+describe('should return an error if invalid image quantization parameters were provided', () => {
   it('should return a RangeError if parameters does not include rgbImage nor imageElement property', () => {
     const validatedParameters = validateParameters({});
 
@@ -72,7 +72,7 @@ describe('should return an error if invalid quantization parameters were provide
   });
 });
 
-describe('should provide the correct default values for color quantization', () => {
+describe('should provide the correct default values for image quantization', () => {
   const rgbImage = createRandomizedRGBImage(2 ** 10);
 
   it('should provide the default value for numberOfColors if it was not provided', () => {

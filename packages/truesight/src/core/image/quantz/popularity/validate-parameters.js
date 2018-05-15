@@ -1,13 +1,13 @@
 // @flow
 
-import type { ValidatedQuantizationParameters } from 'core/image/quantz/types';
+import type { ImageQuantizationParameters } from 'core/image/quantz/types';
 import type { Try } from 'utils/fp/neither';
-import validateQuantizationParameters from 'core/image/quantz/utils/validate-parameters';
+import validateImageQuantizationParameters from 'core/image/quantz/utils/validate-parameters';
 
-import type { PopularityParameters, ValidatedPopularityParameters } from './types';
+import type { PopularityParameters } from './types';
 import { DEFAULT_REGION_SIZE } from './types';
 
-export default function validateParameters(parameters: PopularityParameters): Try<ValidatedPopularityParameters> {
+export default function validateParameters(parameters: PopularityParameters): Try<PopularityParameters> {
   const { regionSize = DEFAULT_REGION_SIZE } = parameters;
   const [hue, saturation, lightness] = regionSize;
 
@@ -47,13 +47,13 @@ export default function validateParameters(parameters: PopularityParameters): Tr
   };
 }
 
-function validateBaseParameters(parameters: PopularityParameters): Try<ValidatedQuantizationParameters> {
+function validateBaseParameters(parameters: PopularityParameters): Try<ImageQuantizationParameters> {
   if (parameters.rgbImage) {
     const { rgbImage, numberOfColors, quality } = parameters;
-    return validateQuantizationParameters({ rgbImage, numberOfColors, quality });
+    return validateImageQuantizationParameters({ rgbImage, numberOfColors, quality });
   }
 
   // parameters is of type ImageElementConfiguration
   const { imageElement, numberOfColors, quality } = parameters;
-  return validateQuantizationParameters({ imageElement, numberOfColors, quality });
+  return validateImageQuantizationParameters({ imageElement, numberOfColors, quality });
 }

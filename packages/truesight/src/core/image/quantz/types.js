@@ -3,35 +3,18 @@
 import type { ImageElement } from 'core/image/types/image-element';
 import { RGBImage } from 'core/image/types/rgb-image';
 
-// Used for configuring a color quantization algorithm.
-export type QuantizationParameters = RGBImageConfiguration | ImageElementConfiguration;
+// Used for configuring an image quantization algorithm.
+export type ImageQuantizationParameters = RGBImageConfiguration | ImageElementConfiguration;
 
-// Used for configuring a color quantization algorithm from an Image object.
+// Used for configuring an image quantization algorithm from an Image object.
 export type RGBImageConfiguration = {|
-  rgbImage: RGBImage,
-  numberOfColors?: number,
-  quality?: number,
-|};
-
-// Used for configuring a color quantization algorithm from an ImageElement object.
-export type ImageElementConfiguration = {|
-  imageElement: ImageElement,
-  numberOfColors?: number,
-  quality?: number,
-|};
-
-// QuantizationParameters object in which the properties have already been validated.
-export type ValidatedQuantizationParameters = ValidatedRGBImageConfiguration | ValidatedImageElementConfiguration;
-
-// RGBImageConfiguration object in which the properties have already been validated.
-export type ValidatedRGBImageConfiguration = {|
   rgbImage: RGBImage,
   numberOfColors: number,
   quality: number,
 |};
 
-// ImageElementConfiguration in which the properties have already been validated.
-export type ValidatedImageElementConfiguration = {|
+// Used for configuring an image quantization algorithm from an ImageElement object.
+export type ImageElementConfiguration = {|
   imageElement: ImageElement,
   numberOfColors: number,
   quality: number,
@@ -60,7 +43,7 @@ class Quality {
 // Defines an interval of valid quality values.
 export const VALID_QUALITIES = new Quality(HIGHEST_QUALITY, LOWEST_QUALITY);
 
-// Default number of colors for a color quantization algorithm.
+// Default number of colors for an image quantization algorithm.
 export const DEFAULT_NUMBER_OF_COLORS = 8;
-// Default quality for a color quantization algorithm.
+// Default quality for an image quantization algorithm.
 export const DEFAULT_QUALITY = HIGHEST_QUALITY;

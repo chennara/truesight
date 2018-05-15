@@ -3,8 +3,6 @@
 import type {
   RGBImageConfiguration as RGBImageBaseConfiguration,
   ImageElementConfiguration as ImageElementBaseConfiguration,
-  ValidatedRGBImageConfiguration as ValidatedRGBImageBaseConfiguration,
-  ValidatedImageElementConfiguration as ValidatedImageElementBaseConfiguration,
 } from 'core/image/quantz/types';
 
 // Used for configuring the popularity algorithm.
@@ -13,27 +11,12 @@ export type PopularityParameters = RGBImageConfiguration | ImageElementConfigura
 // Used for configuring the popularity algorithm from an Image object.
 export type RGBImageConfiguration = {|
   ...RGBImageBaseConfiguration,
-  regionSize?: RegionSize,
+  regionSize: RegionSize,
 |};
 
 // Used for configuring the popularity algorithm from an ImageElement object.
 export type ImageElementConfiguration = {|
   ...ImageElementBaseConfiguration,
-  regionSize?: RegionSize,
-|};
-
-// PopularityParameters object in which the properties have already been validated.
-export type ValidatedPopularityParameters = ValidatedRGBImageConfiguration | ValidatedImageElementConfiguration;
-
-// RGBImageConfiguration object in which the properties have already been validated.
-export type ValidatedRGBImageConfiguration = {|
-  ...ValidatedRGBImageBaseConfiguration,
-  regionSize: RegionSize,
-|};
-
-// ImageElementConfiguration object in which the properties have already been validated.
-export type ValidatedImageElementConfiguration = {|
-  ...ValidatedImageElementBaseConfiguration,
   regionSize: RegionSize,
 |};
 

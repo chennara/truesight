@@ -825,14 +825,17 @@ function getRegionPopulation(histogram) {
   return histogram.reduce((accumulator, color) => accumulator + color[1], 0);
 }
 
-var ColorQuantization = {
+var ImageQuantization = {
   quantize,
   reduce,
   popularize,
 };
 
-var index = _extends({}, ColorQuantization, {
-  RGBImage,
-});
+var index = _extends(
+  {
+    RGBImage,
+  },
+  ImageQuantization
+);
 
 export default index;

@@ -1,16 +1,15 @@
 // @flow
 
 import type {
-  QuantizationParameters,
+  ImageQuantizationParameters,
   RGBImageConfiguration,
   ImageElementConfiguration,
-  ValidatedQuantizationParameters,
 } from 'core/image/quantz/types';
 import type { Try } from 'utils/fp/neither';
 import { RGBImage } from 'core/image/types/rgb-image';
 import { VALID_QUALITIES, DEFAULT_QUALITY, DEFAULT_NUMBER_OF_COLORS } from 'core/image/quantz/types';
 
-export default function validateParameters(parameters: QuantizationParameters): Try<ValidatedQuantizationParameters> {
+export default function validateParameters(parameters: ImageQuantizationParameters): Try<ImageQuantizationParameters> {
   if (!parameters.rgbImage && !parameters.imageElement) {
     return new RangeError('parameters should include either rgbImage or imageElement property');
   }
@@ -23,7 +22,7 @@ export default function validateParameters(parameters: QuantizationParameters): 
   return validateImageElementConfiguration(parameters);
 }
 
-function validateRGBImageConfiguration(parameters: RGBImageConfiguration): Try<ValidatedQuantizationParameters> {
+function validateRGBImageConfiguration(parameters: RGBImageConfiguration): Try<ImageQuantizationParameters> {
   const { rgbImage } = parameters;
 
   if (!(rgbImage instanceof RGBImage)) {
@@ -33,9 +32,7 @@ function validateRGBImageConfiguration(parameters: RGBImageConfiguration): Try<V
   return validateBaseConfiguration(parameters);
 }
 
-function validateImageElementConfiguration(
-  parameters: ImageElementConfiguration
-): Try<ValidatedQuantizationParameters> {
+function validateImageElementConfiguration(parameters: ImageElementConfiguration): Try<ImageQuantizationParameters> {
   const { imageElement } = parameters;
 
   if (!(imageElement instanceof HTMLImageElement) && !(imageElement instanceof HTMLCanvasElement)) {
@@ -45,7 +42,7 @@ function validateImageElementConfiguration(
   return validateBaseConfiguration(parameters);
 }
 
-function validateBaseConfiguration(parameters: QuantizationParameters): Try<ValidatedQuantizationParameters> {
+function validateBaseConfiguration(parameters: ImageQuantizationParameters): Try<ImageQuantizationParameters> {
   const { numberOfColors = DEFAULT_NUMBER_OF_COLORS, quality = DEFAULT_QUALITY } = parameters;
 
   if (!Number.isInteger(numberOfColors)) {

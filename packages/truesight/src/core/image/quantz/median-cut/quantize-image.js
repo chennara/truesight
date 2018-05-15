@@ -1,9 +1,10 @@
 // @flow
 
-import type { QuantizationParameters, ValidatedQuantizationParameters } from 'core/image/quantz/types';
 import { RGBImage } from 'core/image/types/rgb-image';
 import { RGBColor, RED_CHANNEL_INDEX, GREEN_CHANNEL_INDEX, BLUE_CHANNEL_INDEX } from 'core/color/rgb-color';
 import validateParameters from 'core/image/quantz/utils/validate-parameters';
+
+import type { MedianCutParameters } from './types';
 
 // Maps each color in the image to its representative color.
 export type InverseColorMap = {|
@@ -11,7 +12,7 @@ export type InverseColorMap = {|
   representativeColor: RGBColor,
 |}[];
 
-// A histogram of the most dominant colors in a image.
+// A histogram of the most dominant colors in an image.
 export type ColorPalette = {|
   color: RGBColor,
   population: number,
@@ -23,15 +24,15 @@ type Vbox = RGBColor[];
 // Enum for safely accessing a channel in a RGBColor object.
 type RGBIndex = typeof RED_CHANNEL_INDEX | typeof GREEN_CHANNEL_INDEX | typeof BLUE_CHANNEL_INDEX;
 
-export function quantize(parameters: QuantizationParameters): Promise<InverseColorMap> {
+export function quantize(parameters: MedianCutParameters): Promise<InverseColorMap> {
   return runMedianCut(parameters, buildInverseColorMap);
 }
 
-export function reduce(parameters: QuantizationParameters): Promise<ColorPalette> {
+export function reduce(parameters: MedianCutParameters): Promise<ColorPalette> {
   return runMedianCut(parameters, buildColorPalette);
 }
 
-async function runMedianCut<T>(parameters: QuantizationParameters, buildMap: (Vbox[]) => T): Promise<T> {
+async function runMedianCut<T>(parameters: MedianCutParameters, buildMap: (Vbox[]) => T): Promise<T> {
   const validatedParameters = validateParameters(parameters);
   if (validatedParameters instanceof Error) {
     return Promise.reject(validatedParameters);
@@ -44,7 +45,7 @@ async function runMedianCut<T>(parameters: QuantizationParameters, buildMap: (Vb
   return resultingMap;
 }
 
-async function extractRGBImage(parameters: ValidatedQuantizationParameters): Promise<RGBImage> {
+async function extractRGBImage(parameters: MedianCutParameters): Promise<RGBImage> {
   return parameters.rgbImage
     ? parameters.rgbImage
     : RGBImage.fromImageElement(parameters.imageElement, parameters.quality);

@@ -4,11 +4,11 @@ import { HSLuvImage } from 'core/image/types/hsluv-image';
 import { HSLuvColor } from 'core/color/hsluv-color';
 import { RGBColor } from 'core/color/rgb-color';
 
-import type { PopularityParameters, ValidatedPopularityParameters, RegionSize } from './types';
+import type { PopularityParameters, RegionSize } from './types';
 import validateParameters from './validate-parameters';
 import mapColorToRegionID from './map-color-to-region-id';
 
-// A histogram of the most dominant colors in a image.
+// A histogram of the most dominant colors in an image.
 export type ColorPalette = ColorToPopulationMap[];
 
 // Maps a color to the number of pixels with that specific color.
@@ -39,7 +39,7 @@ export default async function popularize(parameters: PopularityParameters): Prom
   return colorPalette;
 }
 
-async function extractHSLuvImage(parameters: ValidatedPopularityParameters): Promise<HSLuvImage> {
+async function extractHSLuvImage(parameters: PopularityParameters): Promise<HSLuvImage> {
   return parameters.rgbImage
     ? HSLuvImage.fromRGBImage(parameters.rgbImage, parameters.quality)
     : HSLuvImage.fromImageElement(parameters.imageElement, parameters.quality);
