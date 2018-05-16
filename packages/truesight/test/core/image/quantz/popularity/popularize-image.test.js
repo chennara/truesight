@@ -21,7 +21,7 @@ describe('popularize should return a palette holding the expected number of colo
 });
 
 describe('popularize should return a palette holding the expected number of colors (HTMLImageElement)', () => {
-  const imageElement = new window.Image();
+  const imageElement = new Image();
   imageElement.src = 'base/test/resources/images/baby-driver_2017.jpg';
 
   it('should return a palette holding the expected number of colors', async () => {
@@ -39,7 +39,7 @@ describe('popularize should return a palette holding the expected number of colo
   const canvasElement = document.createElement('canvas');
 
   before((done) => {
-    const imageElement = new window.Image();
+    const imageElement = new Image();
 
     imageElement.onload = () => {
       drawImageToCanvas(imageElement, canvasElement);
@@ -91,7 +91,7 @@ describe('popularize should return an error if invalid parameters were provided'
 });
 
 describe('popularize should return a palette holding the most dominant colors', () => {
-  const imageElement = new window.Image();
+  const imageElement = new Image();
   imageElement.src = 'base/test/resources/images/the-incredibles_2004.jpg';
 
   it('should return a palette holding the most dominant colors', async () => {

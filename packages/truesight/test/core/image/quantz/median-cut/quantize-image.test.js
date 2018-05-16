@@ -24,7 +24,7 @@ describe('median cut should return a map holding the expected number of colors (
 
 describe('median cut should return a map holding the expected number of colors (HTMLImageElement)', () => {
   const imageSize = 674 * 1000;
-  const imageElement = new window.Image();
+  const imageElement = new Image();
   imageElement.src = 'base/test/resources/images/baby-driver_2017.jpg';
 
   const testSuite = {
@@ -45,7 +45,7 @@ describe('median cut should return a map holding the expected number of colors (
   const canvasElement = document.createElement('canvas');
 
   before((done) => {
-    const imageElement = new window.Image();
+    const imageElement = new Image();
 
     imageElement.onload = () => {
       drawImageToCanvas(imageElement, canvasElement);
@@ -120,7 +120,7 @@ describe('median cut should return an error if invalid parameters were provided'
 
     try {
       await reduce({
-        imageElement: new window.Image(),
+        imageElement: new Image(),
         numberOfColors: -2,
       });
     } catch (error) {
@@ -133,7 +133,7 @@ describe('median cut should return an error if invalid parameters were provided'
 });
 
 describe('reduce should return a map holding the most dominant colors', () => {
-  const imageElement = new window.Image();
+  const imageElement = new Image();
   imageElement.src = 'base/test/resources/images/baby-driver_2017.jpg';
 
   it('should return a map holding the most dominant colors', async () => {

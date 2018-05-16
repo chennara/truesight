@@ -33,7 +33,7 @@ describe('should return an error if invalid image quantization parameters were p
 
   it('should return a TypeError if numberOfColors is not an integer', () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
       numberOfColors: 9.5,
     });
 
@@ -43,7 +43,7 @@ describe('should return an error if invalid image quantization parameters were p
 
   it('should return a RangeError if numberOfColors does not lie [1, 256]', () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
       numberOfColors: 270,
     });
 
@@ -53,7 +53,7 @@ describe('should return an error if invalid image quantization parameters were p
 
   it('should return a TypeError if quality is not an integer', () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
       quality: true,
     });
 
@@ -63,7 +63,7 @@ describe('should return an error if invalid image quantization parameters were p
 
   it(`should return a RangeError if quality does not lie in ${VALID_QUALITIES.toString()}`, () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
       quality: 100,
     });
 

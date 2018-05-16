@@ -4,7 +4,7 @@ import validateParameters from 'core/image/quantz/popularity/validate-parameters
 describe('popularize should return an error if invalid parameters were provided', () => {
   it('should return a RangeError if regionSize is not of type [number, number, number]', () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
       regionSize: [10, 20],
     });
 
@@ -14,7 +14,7 @@ describe('popularize should return an error if invalid parameters were provided'
 
   it('should return a TypeError if hue in regionSize is not an integer', () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
       regionSize: ['15', 20, 20],
     });
 
@@ -24,7 +24,7 @@ describe('popularize should return an error if invalid parameters were provided'
 
   it('should return a RangeError if hue in regionSize does not lie in [1, 360]', () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
       regionSize: [0, 20, 20],
     });
 
@@ -34,7 +34,7 @@ describe('popularize should return an error if invalid parameters were provided'
 
   it('should return a RangeError if saturation in regionSize is not an integer', () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
       regionSize: [18, 'ten', 10],
     });
 
@@ -44,7 +44,7 @@ describe('popularize should return an error if invalid parameters were provided'
 
   it('should return a RangeError if saturation in regionSize does not lie in [1, 100]', () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
       regionSize: [1, 128, 20],
     });
 
@@ -54,7 +54,7 @@ describe('popularize should return an error if invalid parameters were provided'
 
   it('should return a RangeError if lightness in regionSize is not an integer', () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
       regionSize: [18, 20, false],
     });
 
@@ -64,7 +64,7 @@ describe('popularize should return an error if invalid parameters were provided'
 
   it('should return a RangeError if lightness in regionSize does not lie in [1, 100]', () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
       regionSize: [10, 50, 128],
     });
 
@@ -76,7 +76,7 @@ describe('popularize should return an error if invalid parameters were provided'
 describe('should provide the correct default values for the popularity algorithm', () => {
   it('should provide the default value for hue in regionSize if it was not provided', () => {
     const validatedParameters = validateParameters({
-      imageElement: new window.Image(),
+      imageElement: new Image(),
     });
 
     expect(validatedParameters).not.to.be.a('error');
