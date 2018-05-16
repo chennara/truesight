@@ -1,4 +1,4 @@
-# Limit the subject line to 50 characters.        $ <- 51st character
+# Try to limit the subject line to 50 characters. $ <- 51st character
 # If applied, this commit will...                 $
 
 
@@ -6,7 +6,7 @@
 # Why is this change needed?                                            $
 
 
-# Any references to issue tracking IDs or pull request numbers?
+# Any references to issue tracking IDs or pull request numbers?         $
 
 
 # Keep following guidelines in mind:
