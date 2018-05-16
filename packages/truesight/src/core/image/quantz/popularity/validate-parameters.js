@@ -12,28 +12,28 @@ export default function validateParameters(parameters: PopularityParameters): Tr
   const [hue, saturation, lightness] = regionSize;
 
   if (regionSize.length !== 3) {
-    return RangeError('regionSize should be of type [number, number, number]');
+    return new RangeError('regionSize should be of type [number, number, number]');
   }
 
   if (!Number.isInteger(hue)) {
-    return TypeError('hue in regionSize should be an integer');
+    return new TypeError('hue in regionSize should be an integer');
   }
   if (!(hue >= 1 && hue <= 360)) {
-    return RangeError('hue in regionSize should lie in [1, 360]');
+    return new RangeError('hue in regionSize should lie in [1, 360]');
   }
 
   if (!Number.isInteger(saturation)) {
-    return TypeError('saturation in regionSize should be an integer');
+    return new TypeError('saturation in regionSize should be an integer');
   }
   if (!(saturation >= 1 && saturation <= 100)) {
-    return RangeError('saturation in regionSize should lie in [1, 100]');
+    return new RangeError('saturation in regionSize should lie in [1, 100]');
   }
 
   if (!Number.isInteger(lightness)) {
-    return TypeError('lightness in regionSize should be an integer');
+    return new TypeError('lightness in regionSize should be an integer');
   }
   if (!(lightness >= 1 && lightness <= 100)) {
-    return RangeError('lightness in regionSize should lie in [1, 100]');
+    return new RangeError('lightness in regionSize should lie in [1, 100]');
   }
 
   const validatedBaseParameters = validateBaseParameters(parameters);
