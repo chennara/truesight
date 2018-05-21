@@ -1,9 +1,9 @@
 import { VALID_QUALITIES, DEFAULT_NUMBER_OF_COLORS, DEFAULT_QUALITY } from 'core/image/quantz/types';
-import validateParameters from 'core/image/quantz/utils/validate-parameters';
+import validateParameters from 'core/image/quantz/median-cut/validate-parameters';
 
 import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image';
 
-describe('should return an error if invalid image quantization parameters were provided', () => {
+describe('validating invalid median cut parameters should return an error', () => {
   it('should return a RangeError if parameters does not include rgbImage nor imageElement property', () => {
     const validatedParameters = validateParameters({});
 

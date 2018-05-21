@@ -3,12 +3,12 @@
 import type {
   RGBImageConfiguration as RGBImageBaseConfiguration,
   ImageElementConfiguration as ImageElementBaseConfiguration,
-} from 'core/image/quantz/types';
+} from 'core/image/quantz/median-cut/types';
 
 // Used for configuring the popularity algorithm.
 export type PopularityParameters = RGBImageConfiguration | ImageElementConfiguration;
 
-// Used for configuring the popularity algorithm from an Image object.
+// Used for configuring the popularity algorithm from a RGBImage object.
 export type RGBImageConfiguration = {|
   ...RGBImageBaseConfiguration,
   regionSize: RegionSize,

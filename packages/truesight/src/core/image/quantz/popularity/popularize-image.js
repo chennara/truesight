@@ -23,7 +23,7 @@ type ImageHistogram = [string, RegionHistogram][];
 // Maps a color to the number of pixels with that specific color within a specific region.
 type RegionHistogram = [string, number][];
 
-export default async function popularize(parameters: PopularityParameters): Promise<ColorPalette> {
+export default async function popularizeImage(parameters: PopularityParameters): Promise<ColorPalette> {
   const validatedParameters = validateParameters(parameters);
   if (validatedParameters instanceof Error) {
     return Promise.reject(validatedParameters);

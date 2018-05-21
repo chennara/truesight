@@ -45,7 +45,7 @@ imageElements.forEach((imageElement) => {
 
   const createSectionNode = async (fn) => {
     const t0 = performance.now();
-    const colorPalette = await truesight[fn](parameters); // eslint-disable-line no-undef
+    const colorPalette = await window.truesight[fn](parameters);
     const t1 = performance.now();
     const elapsedTime = Math.floor(t1 - t0 + 0.5);
 
@@ -62,7 +62,7 @@ imageElements.forEach((imageElement) => {
 
   const cardNode = imageElement.parentNode.parentNode.parentNode;
 
-  ['reduce', 'popularize'].forEach(async (fn) => {
+  ['reduceImage', 'popularizeImage'].forEach(async (fn) => {
     const sectionNode = await createSectionNode(fn);
     cardNode.appendChild(sectionNode);
   });

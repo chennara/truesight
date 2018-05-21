@@ -32,7 +32,7 @@ export default function mapColorToRegionID(color: HSLuvColor, regionSize: Region
   ].join(',');
 }
 
-// The return value should be interpreted as a half-open interval [begin, end) of color values.
+// The return value should be interpreted as a half-open interval of channel values in [begin, end).
 function mapChannelToRegionID(intervals: number[], channel: number): string {
   let i = 0;
   while (channel >= intervals[i] && i < intervals.length) {

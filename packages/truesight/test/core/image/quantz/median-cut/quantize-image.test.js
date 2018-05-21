@@ -1,5 +1,5 @@
 import { RGBColor } from 'core/color/rgb-color';
-import { quantize, reduce } from 'core/image/quantz/median-cut/quantize-image';
+import { quantizeImage, reduceImage } from 'core/image/quantz/median-cut/quantize-image';
 
 import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image';
 import drawImageToCanvas from '../test-utils/draw-image-to-canvas';
@@ -69,30 +69,30 @@ describe('median cut should return a map holding the expected number of colors (
 });
 
 function runExpectedNumberOfColorsTests(testSuite) {
-  it('quantize should return a map holding the expected number of colors', async () => {
-    const inverseColorMap = await quantize(testSuite.parameters);
+  it('quantizeImage should return a map holding the expected number of colors', async () => {
+    const inverseColorMap = await quantizeImage(testSuite.parameters);
 
     expect(inverseColorMap).to.have.lengthOf(testSuite.expectedImageSize);
   });
 
   // This doesn't always hold for images where a color heavily dominates the image: numberOfColors will then define
   // an upper bound for expectedColorPaletteSize.
-  it('quantize should return a map with the expected number of colors in range', async () => {
-    const inverseColorMap = await quantize(testSuite.parameters);
+  it('quantizeImage should return a map with the expected number of colors in range', async () => {
+    const inverseColorMap = await quantizeImage(testSuite.parameters);
     const centroidsRange = [...new Set(inverseColorMap.map((entry) => entry.representativeColor))];
 
     expect(centroidsRange).to.have.lengthOf(testSuite.expectedColorPaletteSize);
   });
 
   // For previously mentioned images, some entries might be empty.
-  it('reduce should return a palette holding the expected number of colors', async () => {
-    const colorPalette = await reduce(testSuite.parameters);
+  it('reduceImage should return a palette holding the expected number of colors', async () => {
+    const colorPalette = await reduceImage(testSuite.parameters);
 
     expect(colorPalette).to.have.lengthOf(testSuite.expectedColorPaletteSize);
   });
 
-  it('reduce should return a palette with the expected number of colors in range', async () => {
-    const colorPalette = await reduce(testSuite.parameters);
+  it('reduceImage should return a palette with the expected number of colors in range', async () => {
+    const colorPalette = await reduceImage(testSuite.parameters);
     const totalPopulation = colorPalette.reduce((accumulator, entry) => accumulator + entry.population, 0);
 
     expect(totalPopulation).to.equal(testSuite.expectedImageSize);
@@ -104,7 +104,7 @@ describe('median cut should return an error if invalid parameters were provided'
     let errorOccurred = false;
 
     try {
-      await quantize({
+      await quantizeImage({
         rgbImage: [],
       });
     } catch (error) {
@@ -119,7 +119,7 @@ describe('median cut should return an error if invalid parameters were provided'
     let errorOccurred = false;
 
     try {
-      await reduce({
+      await reduceImage({
         imageElement: new Image(),
         numberOfColors: -2,
       });
@@ -132,12 +132,12 @@ describe('median cut should return an error if invalid parameters were provided'
   });
 });
 
-describe('reduce should return a map holding the most dominant colors', () => {
+describe('reduceImage should return a map holding the most dominant colors', () => {
   const imageElement = new Image();
   imageElement.src = 'base/test/resources/images/baby-driver_2017.jpg';
 
   it('should return a map holding the most dominant colors', async () => {
-    const inverseColorMap = await reduce({
+    const inverseColorMap = await reduceImage({
       imageElement,
       numberOfColors: 9,
       quality: 16,

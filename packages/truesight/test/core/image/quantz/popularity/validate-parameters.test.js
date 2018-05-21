@@ -1,7 +1,7 @@
 import { DEFAULT_REGION_SIZE } from 'core/image/quantz/popularity/types';
 import validateParameters from 'core/image/quantz/popularity/validate-parameters';
 
-describe('popularize should return an error if invalid parameters were provided', () => {
+describe('validating invalid popularity parameters should return an error', () => {
   it('should return a RangeError if regionSize is not of type [number, number, number]', () => {
     const validatedParameters = validateParameters({
       imageElement: new Image(),

@@ -1,16 +1,16 @@
 import { RGBColor } from 'core/color/rgb-color';
-import popularize from 'core/image/quantz/popularity/popularize-image';
+import popularizeImage from 'core/image/quantz/popularity/popularize-image';
 
 import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image';
 import drawImageToCanvas from '../test-utils/draw-image-to-canvas';
 import checkIfSimilarColors from '../test-utils/check-if-similar-colors';
 
-describe('popularize should return a palette holding the expected number of colors (RGBImage)', () => {
+describe('popularizeImage should return a palette holding the expected number of colors (RGBImage)', () => {
   it('should return a palette holding the expected number of colors', async () => {
     const imageSize = 2 ** 12;
     const rgbImage = createRandomizedRGBImage(imageSize);
 
-    const colorPalette = await popularize({
+    const colorPalette = await popularizeImage({
       rgbImage,
       numberOfColors: 6,
       quality: 3,
@@ -20,12 +20,12 @@ describe('popularize should return a palette holding the expected number of colo
   });
 });
 
-describe('popularize should return a palette holding the expected number of colors (HTMLImageElement)', () => {
+describe('popularizeImage should return a palette holding the expected number of colors (HTMLImageElement)', () => {
   const imageElement = new Image();
   imageElement.src = 'base/test/resources/images/baby-driver_2017.jpg';
 
   it('should return a palette holding the expected number of colors', async () => {
-    const colorPalette = await popularize({
+    const colorPalette = await popularizeImage({
       imageElement,
       numberOfColors: 6,
       quality: 19,
@@ -35,7 +35,7 @@ describe('popularize should return a palette holding the expected number of colo
   });
 });
 
-describe('popularize should return a palette holding the expected number of colors (HTMLCanvasElement)', () => {
+describe('popularizeImage should return a palette holding the expected number of colors (HTMLCanvasElement)', () => {
   const canvasElement = document.createElement('canvas');
 
   before((done) => {
@@ -50,7 +50,7 @@ describe('popularize should return a palette holding the expected number of colo
   });
 
   it('should return a palette holding the expected number of colors', async () => {
-    const colorPalette = await popularize({
+    const colorPalette = await popularizeImage({
       imageElement: canvasElement,
       numberOfColors: 16,
       quality: 19,
@@ -60,12 +60,12 @@ describe('popularize should return a palette holding the expected number of colo
   });
 });
 
-describe('popularize should return an error if invalid parameters were provided', () => {
+describe('popularizeImage should return an error if invalid parameters were provided', () => {
   it('should return a RangeError if parameters does not include rgbImage nor imageElement property', async () => {
     let errorOccurred = false;
 
     try {
-      await popularize({});
+      await popularizeImage({});
     } catch (error) {
       expect(error).to.be.an.instanceof(RangeError);
       errorOccurred = true;
@@ -78,7 +78,7 @@ describe('popularize should return an error if invalid parameters were provided'
     let errorOccurred = false;
 
     try {
-      await popularize({
+      await popularizeImage({
         rgbImage: [],
       });
     } catch (error) {
@@ -90,12 +90,12 @@ describe('popularize should return an error if invalid parameters were provided'
   });
 });
 
-describe('popularize should return a palette holding the most dominant colors', () => {
+describe('popularizeImage should return a palette holding the most dominant colors', () => {
   const imageElement = new Image();
   imageElement.src = 'base/test/resources/images/the-incredibles_2004.jpg';
 
   it('should return a palette holding the most dominant colors', async () => {
-    const colorPalette = await popularize({
+    const colorPalette = await popularizeImage({
       imageElement,
       quality: 20,
       regionSize: [10, 20, 20],

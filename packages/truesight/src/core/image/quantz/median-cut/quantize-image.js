@@ -2,9 +2,9 @@
 
 import { RGBImage } from 'core/image/types/rgb-image';
 import { RGBColor, RED_CHANNEL_INDEX, GREEN_CHANNEL_INDEX, BLUE_CHANNEL_INDEX } from 'core/color/rgb-color';
-import validateParameters from 'core/image/quantz/utils/validate-parameters';
 
 import type { MedianCutParameters } from './types';
+import validateParameters from './validate-parameters';
 
 // Maps each color in the image to its representative color.
 export type InverseColorMap = {|
@@ -24,11 +24,11 @@ type Vbox = RGBColor[];
 // Enum for safely accessing a channel in a RGBColor object.
 type RGBIndex = typeof RED_CHANNEL_INDEX | typeof GREEN_CHANNEL_INDEX | typeof BLUE_CHANNEL_INDEX;
 
-export function quantize(parameters: MedianCutParameters): Promise<InverseColorMap> {
+export function quantizeImage(parameters: MedianCutParameters): Promise<InverseColorMap> {
   return runMedianCut(parameters, buildInverseColorMap);
 }
 
-export function reduce(parameters: MedianCutParameters): Promise<ColorPalette> {
+export function reduceImage(parameters: MedianCutParameters): Promise<ColorPalette> {
   return runMedianCut(parameters, buildColorPalette);
 }
 

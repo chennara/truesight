@@ -457,18 +457,22 @@ class RGBImage {
   }
 }
 
-const HIGHEST_QUALITY = 1;
-const LOWEST_QUALITY = 25;
-class Quality {
-  constructor(highest, lowest) {
-    this.highest = highest;
-    this.lowest = lowest;
+class Interval {
+  constructor(begin, end) {
+    this.begin = begin;
+    this.end = end;
+  }
+  liesIn(value) {
+    return value >= this.begin && value <= this.end;
   }
   toString() {
-    return `[${this.highest}, ${this.lowest}]`;
+    return `[${this.begin}, ${this.end}]`;
   }
 }
-const VALID_QUALITIES = new Quality(HIGHEST_QUALITY, LOWEST_QUALITY);
+
+const HIGHEST_QUALITY = 1;
+const LOWEST_QUALITY = 25;
+const VALID_QUALITIES = new Interval(HIGHEST_QUALITY, LOWEST_QUALITY);
 const DEFAULT_NUMBER_OF_COLORS = 8;
 const DEFAULT_QUALITY = HIGHEST_QUALITY;
 
@@ -506,7 +510,7 @@ function validateBaseConfiguration(parameters) {
   if (!Number.isInteger(quality)) {
     return new TypeError('quality should be an integer');
   }
-  if (!(quality >= VALID_QUALITIES.highest && quality <= VALID_QUALITIES.lowest)) {
+  if (!VALID_QUALITIES.liesIn(quality)) {
     return new RangeError(`quality should lie in ${VALID_QUALITIES.toString()}`);
   }
   if (parameters.rgbImage) {
@@ -515,10 +519,10 @@ function validateBaseConfiguration(parameters) {
   return { imageElement: parameters.imageElement, numberOfColors, quality };
 }
 
-function quantize(parameters) {
+function quantizeImage(parameters) {
   return runMedianCut(parameters, buildInverseColorMap);
 }
-function reduce(parameters) {
+function reduceImage(parameters) {
   return runMedianCut(parameters, buildColorPalette);
 }
 async function runMedianCut(parameters, buildMap) {
@@ -751,7 +755,7 @@ function mapChannelToRegionID(intervals, channel) {
   return [intervals[i - 1], intervals[i]].toString();
 }
 
-var popularize = async function popularize(parameters) {
+var popularizeImage = async function popularizeImage(parameters) {
   const validatedParameters = validateParameters$1(parameters);
   if (validatedParameters instanceof Error) {
     return Promise.reject(validatedParameters);
@@ -828,9 +832,9 @@ function getRegionPopulation(histogram) {
 }
 
 var ImageQuantization = {
-  quantize,
-  reduce,
-  popularize,
+  quantizeImage,
+  reduceImage,
+  popularizeImage,
 };
 
 var index = _extends(

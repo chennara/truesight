@@ -1,10 +1,10 @@
 // @flow
 
-import { quantize, reduce } from './median-cut/quantize-image';
-import popularize from './popularity/popularize-image';
+import { quantizeImage, reduceImage } from './median-cut/quantize-image';
+import popularizeImage from './popularity/popularize-image';
 
 export default {
-  quantize,
-  reduce,
-  popularize,
+  quantizeImage,
+  reduceImage,
+  popularizeImage,
 };
