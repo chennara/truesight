@@ -32,17 +32,18 @@ export function reduceImage(parameters: MedianCutParameters): Promise<ColorPalet
   return runMedianCut(parameters, buildColorPalette);
 }
 
-async function runMedianCut<T>(parameters: MedianCutParameters, buildMap: (Vbox[]) => T): Promise<T> {
+async function runMedianCut<T>(parameters: MedianCutParameters, buildColorMap: (Vbox[]) => T): Promise<T> {
   const validatedParameters = validateParameters(parameters);
+
   if (validatedParameters instanceof Error) {
     return Promise.reject(validatedParameters);
   }
 
   const rgbImage = await extractRGBImage(validatedParameters);
   const vboxes = findMostDominantColors(rgbImage, validatedParameters.numberOfColors);
-  const resultingMap = buildMap(vboxes);
+  const colorMap = buildColorMap(vboxes);
 
-  return resultingMap;
+  return colorMap;
 }
 
 async function extractRGBImage(parameters: MedianCutParameters): Promise<RGBImage> {

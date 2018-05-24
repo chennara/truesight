@@ -25,6 +25,7 @@ type RegionHistogram = [string, number][];
 
 export default async function popularizeImage(parameters: PopularityParameters): Promise<ColorPalette> {
   const validatedParameters = validateParameters(parameters);
+
   if (validatedParameters instanceof Error) {
     return Promise.reject(validatedParameters);
   }

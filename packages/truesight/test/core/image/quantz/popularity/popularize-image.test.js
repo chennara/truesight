@@ -41,10 +41,13 @@ describe('popularizeImage should return a palette holding the expected number of
   before((done) => {
     const imageElement = new Image();
 
-    imageElement.onload = () => {
+    const onImageLoad = () => {
       drawImageToCanvas(imageElement, canvasElement);
+      imageElement.removeEventListener('load', onImageLoad);
       done();
     };
+
+    imageElement.addEventListener('load', onImageLoad);
 
     imageElement.src = 'base/test/resources/images/the-incredibles_2004.jpg';
   });

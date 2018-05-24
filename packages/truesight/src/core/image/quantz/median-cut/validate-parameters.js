@@ -56,10 +56,5 @@ function validateBaseConfiguration(parameters: MedianCutParameters): Try<MedianC
     return new RangeError(`quality should lie in ${VALID_QUALITIES.toString()}`);
   }
 
-  if (parameters.rgbImage) {
-    return { rgbImage: parameters.rgbImage, numberOfColors, quality };
-  }
-
-  // parameters is of type ImageElementConfiguration
-  return { imageElement: parameters.imageElement, numberOfColors, quality };
+  return Object.assign(parameters, { numberOfColors, quality });
 }

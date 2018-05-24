@@ -37,6 +37,7 @@ export default function validateParameters(parameters: PopularityParameters): Tr
   }
 
   const validatedBaseParameters = validateBaseParameters(parameters);
+
   if (validatedBaseParameters instanceof Error) {
     return validatedBaseParameters;
   }

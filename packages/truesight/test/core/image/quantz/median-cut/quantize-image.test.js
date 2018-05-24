@@ -47,10 +47,13 @@ describe('median cut should return a map holding the expected number of colors (
   before((done) => {
     const imageElement = new Image();
 
-    imageElement.onload = () => {
+    const onImageLoad = () => {
       drawImageToCanvas(imageElement, canvasElement);
+      imageElement.removeEventListener('load', onImageLoad);
       done();
     };
+
+    imageElement.addEventListener('load', onImageLoad);
 
     imageElement.src = 'base/test/resources/images/the-incredibles_2004.jpg';
   });

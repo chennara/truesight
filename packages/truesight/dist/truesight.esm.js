@@ -410,18 +410,20 @@ var getImageData = async function getImageData(imageElement) {
 };
 function getImageDataFromHTMLImageElement(imageElement) {
   return new Promise((resolve) => {
-    if (imageElement.complete && imageElement.naturalWidth !== 0) {
-      const canvasElement = drawImageToHiddenCanvas(imageElement);
+    if (imageElement.complete) {
+      const canvasElement = drawImageToCanvas(imageElement);
       resolve(getImageDataFromHTMLCanvasElement(canvasElement));
     } else {
-      imageElement.onload = () => {
-        const canvasElement = drawImageToHiddenCanvas(imageElement);
+      const onImageLoad = () => {
+        const canvasElement = drawImageToCanvas(imageElement);
         resolve(getImageDataFromHTMLCanvasElement(canvasElement));
+        imageElement.removeEventListener('load', onImageLoad);
       };
+      imageElement.addEventListener('load', onImageLoad);
     }
   });
 }
-function drawImageToHiddenCanvas(imageElement) {
+function drawImageToCanvas(imageElement) {
   const canvasElement = document.createElement('canvas');
   canvasElement.width = imageElement.width;
   canvasElement.height = imageElement.height;
@@ -511,10 +513,7 @@ function validateBaseConfiguration(parameters) {
   if (!VALID_QUALITIES.liesIn(quality)) {
     return new RangeError(`quality should lie in ${VALID_QUALITIES.toString()}`);
   }
-  if (parameters.rgbImage) {
-    return { rgbImage: parameters.rgbImage, numberOfColors, quality };
-  }
-  return { imageElement: parameters.imageElement, numberOfColors, quality };
+  return Object.assign(parameters, { numberOfColors, quality });
 }
 
 function quantizeImage(parameters) {
@@ -523,15 +522,15 @@ function quantizeImage(parameters) {
 function reduceImage(parameters) {
   return runMedianCut(parameters, buildColorPalette);
 }
-async function runMedianCut(parameters, buildMap) {
+async function runMedianCut(parameters, buildColorMap) {
   const validatedParameters = validateParameters(parameters);
   if (validatedParameters instanceof Error) {
     return Promise.reject(validatedParameters);
   }
   const rgbImage = await extractRGBImage(validatedParameters);
   const vboxes = findMostDominantColors(rgbImage, validatedParameters.numberOfColors);
-  const resultingMap = buildMap(vboxes);
-  return resultingMap;
+  const colorMap = buildColorMap(vboxes);
+  return colorMap;
 }
 async function extractRGBImage(parameters) {
   return parameters.rgbImage
@@ -829,17 +828,153 @@ function getRegionPopulation(histogram) {
   return histogram.reduce((accumulator, color) => accumulator + color[1], 0);
 }
 
-var ImageQuantization = {
+var ImageQuantizationAPI = {
   quantizeImage,
   reduceImage,
   popularizeImage,
+};
+
+class AsyncQueue {
+  constructor() {
+    this.values = [];
+    this.settlers = [];
+    this.closed = false;
+  }
+  enqueue(value) {
+    if (this.closed) {
+      throw new Error('unable to enqueue an item onto a closed queue');
+    } else if (this.settlers.length === 0) {
+      this.values.push(value);
+    } else {
+      const settler = this.settlers.shift();
+      if (value instanceof Error) {
+        settler.reject(value.message);
+      } else {
+        settler.resolve({ done: false, value });
+      }
+    }
+  }
+  [Symbol.asyncIterator]() {
+    return this;
+  }
+  next() {
+    if (this.values.length > 0) {
+      const value = this.values.shift();
+      if (value instanceof Error) {
+        return Promise.reject(value);
+      }
+      return Promise.resolve({ done: false, value });
+    } else if (this.closed) {
+      return Promise.resolve({ done: true });
+    }
+    return new Promise((resolve, reject) => {
+      this.settlers.push({ resolve, reject });
+    });
+  }
+  close() {
+    if (this.settlers.length > 0) {
+      const settler = this.settlers.shift();
+      settler.resolve({ done: true });
+    }
+    this.closed = true;
+  }
+}
+
+const VALID_FRAMES_PER_SECONDS = new Interval(1, 24);
+const DEFAULT_FRAMES_PER_SECOND = 1;
+
+function validateParameters$2(parameters) {
+  const { videoElement, framesPerSecond = DEFAULT_FRAMES_PER_SECOND } = parameters;
+  if (!videoElement) {
+    return new RangeError('parameters should include videoElement property');
+  }
+  if (!(videoElement instanceof HTMLVideoElement)) {
+    return new TypeError('videoElement should be of type HTMLVideoElement');
+  }
+  if (!Number.isInteger(framesPerSecond)) {
+    return new TypeError('framesPerSecond should be an integer');
+  }
+  if (!VALID_FRAMES_PER_SECONDS.liesIn(framesPerSecond)) {
+    return new RangeError(`framesPerSecond should lie in ${VALID_FRAMES_PER_SECONDS.toString()}`);
+  }
+  return Object.assign(parameters, { framesPerSecond });
+}
+
+function drawFrameToCanvas(videoElement) {
+  const canvasElement = document.createElement('canvas');
+  canvasElement.width = videoElement.width;
+  canvasElement.height = videoElement.height;
+  const canvasContext = canvasElement.getContext('2d');
+  canvasContext.drawImage(videoElement, 0, 0, videoElement.width, videoElement.height);
+  return canvasElement;
+}
+
+var parseVideo = async function* parseVideo(parseFrame, parameters) {
+  const validatedParameters = validateParameters$2(parameters);
+  if (validatedParameters instanceof Error) {
+    throw validatedParameters;
+  }
+  yield* parseFrames(parseFrame, parameters);
+};
+async function* parseFrames(parseFrame, parameters) {
+  const videoElement = parameters.videoElement.cloneNode();
+  const { framesPerSecond, numberOfColors, quality } = parameters;
+  const colorMaps = new AsyncQueue();
+  let currentTime = 0;
+  const parseNextFrame = async () => {
+    const canvasElement = drawFrameToCanvas(videoElement);
+    const colorMap = await parseFrame({
+      imageElement: canvasElement,
+      numberOfColors,
+      quality,
+    });
+    colorMaps.enqueue(colorMap);
+    currentTime += 1 / framesPerSecond;
+    if (currentTime <= videoElement.duration) {
+      videoElement.currentTime = currentTime;
+    } else {
+      colorMaps.close();
+      videoElement.removeEventListener('seeked', parseNextFrame);
+    }
+  };
+  videoElement.addEventListener('seeked', parseNextFrame);
+  if (videoElement.readyState === 4) {
+    videoElement.currentTime = 0;
+  } else {
+    const playVideo = () => {
+      videoElement.currentTime = 0;
+      videoElement.removeEventListener('loadeddata', playVideo);
+    };
+    videoElement.addEventListener('loadeddata', playVideo);
+  }
+  yield* getNextFrameResult(colorMaps);
+}
+async function* getNextFrameResult(colorMaps) {
+  const frameResult = await colorMaps.next();
+  if (!frameResult.done) {
+    yield frameResult.value;
+    yield* getNextFrameResult(colorMaps);
+  }
+}
+
+function quantizeVideo(parameters) {
+  return parseVideo(quantizeImage, parameters);
+}
+function reduceVideo(parameters) {
+  return parseVideo(reduceImage, parameters);
+}
+
+var VideoQuantizationAPI = {
+  quantizeVideo,
+  reduceVideo,
 };
 
 var index = _extends(
   {
     RGBImage,
   },
-  ImageQuantization
+  ImageQuantizationAPI,
+  VideoQuantizationAPI
 );
 
 export default index;

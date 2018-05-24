@@ -41,7 +41,7 @@ describe('validating invalid median cut parameters should return an error', () =
     expect(validatedParameters.message).to.equal('numberOfColors should be an integer');
   });
 
-  it('should return a RangeError if numberOfColors does not lie [1, 256]', () => {
+  it('should return a RangeError if numberOfColors does not lie in [1, 256]', () => {
     const validatedParameters = validateParameters({
       imageElement: new Image(),
       numberOfColors: 270,
@@ -72,7 +72,7 @@ describe('validating invalid median cut parameters should return an error', () =
   });
 });
 
-describe('should provide the correct default values for image quantization', () => {
+describe('should provide the correct default values for the median cut algorithm', () => {
   const rgbImage = createRandomizedRGBImage(2 ** 10);
 
   it('should provide the default value for numberOfColors if it was not provided', () => {

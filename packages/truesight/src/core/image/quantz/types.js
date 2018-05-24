@@ -1,12 +1,6 @@
 // @flow
 
-import { Interval } from 'utils/math/interval';
-
-import type { MedianCutParameters } from './median-cut/types';
-import type { PopularityParameters } from './popularity/types';
-
-// Parameters object for configuring either the median cut algorithm or the popularity algorithm.
-export type ImageQuantizationParameters = MedianCutParameters | PopularityParameters;
+import { Interval } from 'utils/collections/interval';
 
 // The highest quality for image data extraction.
 const HIGHEST_QUALITY = 1;
