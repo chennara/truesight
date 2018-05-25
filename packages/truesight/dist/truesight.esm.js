@@ -964,9 +964,14 @@ function reduceVideo(parameters) {
   return parseVideo(reduceImage, parameters);
 }
 
+function popularizeVideo(parameters) {
+  return parseVideo(popularizeImage, parameters);
+}
+
 var VideoQuantizationAPI = {
   quantizeVideo,
   reduceVideo,
+  popularizeVideo,
 };
 
 var index = _extends(

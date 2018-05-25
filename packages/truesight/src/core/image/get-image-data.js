@@ -1,6 +1,6 @@
 // @flow
 
-import type { ImageElement } from './types/image-element';
+import type { ImageElement } from './image-element';
 
 export default async function getImageData(imageElement: ImageElement): Promise<Uint8ClampedArray> {
   if (imageElement instanceof HTMLImageElement) {
