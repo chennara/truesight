@@ -4,9 +4,14 @@ import type { Try } from 'utils/fp/neither';
 import { RGBImage } from 'core/image/rgb-image';
 import { VALID_QUALITIES, DEFAULT_QUALITY, DEFAULT_NUMBER_OF_COLORS } from 'core/quantz/image/types';
 
-import type { MedianCutParameters, RGBImageConfiguration, ImageElementConfiguration } from './types';
+import type {
+  MedianCutParameters,
+  RGBImageConfiguration,
+  ImageElementConfiguration,
+  ValidatedMedianCutParameters,
+} from './types';
 
-export default function validateParameters(parameters: MedianCutParameters): Try<MedianCutParameters> {
+export default function validateParameters(parameters: MedianCutParameters): Try<ValidatedMedianCutParameters> {
   if (!parameters.rgbImage && !parameters.imageElement) {
     return new RangeError('parameters should include either rgbImage or imageElement property');
   }
@@ -19,7 +24,7 @@ export default function validateParameters(parameters: MedianCutParameters): Try
   return validateImageElementConfiguration(parameters);
 }
 
-function validateRGBImageConfiguration(parameters: RGBImageConfiguration): Try<MedianCutParameters> {
+function validateRGBImageConfiguration(parameters: RGBImageConfiguration): Try<ValidatedMedianCutParameters> {
   const { rgbImage } = parameters;
 
   if (!(rgbImage instanceof RGBImage)) {
@@ -29,7 +34,7 @@ function validateRGBImageConfiguration(parameters: RGBImageConfiguration): Try<M
   return validateBaseConfiguration(parameters);
 }
 
-function validateImageElementConfiguration(parameters: ImageElementConfiguration): Try<MedianCutParameters> {
+function validateImageElementConfiguration(parameters: ImageElementConfiguration): Try<ValidatedMedianCutParameters> {
   const { imageElement } = parameters;
 
   if (!(imageElement instanceof HTMLImageElement) && !(imageElement instanceof HTMLCanvasElement)) {
@@ -39,7 +44,7 @@ function validateImageElementConfiguration(parameters: ImageElementConfiguration
   return validateBaseConfiguration(parameters);
 }
 
-function validateBaseConfiguration(parameters: MedianCutParameters): Try<MedianCutParameters> {
+function validateBaseConfiguration(parameters: MedianCutParameters): Try<ValidatedMedianCutParameters> {
   const { numberOfColors = DEFAULT_NUMBER_OF_COLORS, quality = DEFAULT_QUALITY } = parameters;
 
   if (!Number.isInteger(numberOfColors)) {
@@ -56,5 +61,9 @@ function validateBaseConfiguration(parameters: MedianCutParameters): Try<MedianC
     return new RangeError(`quality should lie in ${VALID_QUALITIES.toString()}`);
   }
 
-  return Object.assign(parameters, { numberOfColors, quality });
+  if (parameters.rgbImage) {
+    return { rgbImage: parameters.rgbImage, numberOfColors, quality };
+  }
+
+  return { imageElement: parameters.imageElement, numberOfColors, quality };
 }

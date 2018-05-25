@@ -522,7 +522,10 @@
     if (!VALID_QUALITIES.liesIn(quality)) {
       return new RangeError(`quality should lie in ${VALID_QUALITIES.toString()}`);
     }
-    return Object.assign(parameters, { numberOfColors, quality });
+    if (parameters.rgbImage) {
+      return { rgbImage: parameters.rgbImage, numberOfColors, quality };
+    }
+    return { imageElement: parameters.imageElement, numberOfColors, quality };
   }
 
   function quantizeImage(parameters) {
@@ -908,7 +911,7 @@
     if (!VALID_FRAMES_PER_SECONDS.liesIn(framesPerSecond)) {
       return new RangeError(`framesPerSecond should lie in ${VALID_FRAMES_PER_SECONDS.toString()}`);
     }
-    return Object.assign(parameters, { framesPerSecond });
+    return { videoElement, framesPerSecond };
   }
 
   function drawFrameToCanvas(videoElement) {
@@ -920,31 +923,27 @@
     return canvasElement;
   }
 
-  var parseVideo = async function* parseVideo(parseFrame, parameters) {
+  var parseVideo = async function* parseVideo(parameters, parseFrame) {
     const validatedParameters = validateParameters$2(parameters);
     if (validatedParameters instanceof Error) {
       throw validatedParameters;
     }
-    yield* parseFrames(parseFrame, parameters);
+    yield* parseFrames(validatedParameters, parseFrame);
   };
-  async function* parseFrames(parseFrame, parameters) {
+  async function* parseFrames(parameters, parseFrame) {
     const videoElement = parameters.videoElement.cloneNode();
-    const { framesPerSecond, numberOfColors, quality } = parameters;
-    const colorMaps = new AsyncQueue();
+    const { framesPerSecond } = parameters;
+    const frameResults = new AsyncQueue();
     let currentTime = 0;
     const parseNextFrame = async () => {
       const canvasElement = drawFrameToCanvas(videoElement);
-      const colorMap = await parseFrame({
-        imageElement: canvasElement,
-        numberOfColors,
-        quality,
-      });
-      colorMaps.enqueue(colorMap);
+      const frameResult = await parseFrame(canvasElement);
+      frameResults.enqueue(frameResult);
       currentTime += 1 / framesPerSecond;
       if (currentTime <= videoElement.duration) {
         videoElement.currentTime = currentTime;
       } else {
-        colorMaps.close();
+        frameResults.close();
         videoElement.removeEventListener('seeked', parseNextFrame);
       }
     };
@@ -952,31 +951,69 @@
     if (videoElement.readyState === 4) {
       videoElement.currentTime = 0;
     } else {
-      const playVideo = () => {
+      const startVideo = () => {
         videoElement.currentTime = 0;
-        videoElement.removeEventListener('loadeddata', playVideo);
+        videoElement.removeEventListener('loadeddata', startVideo);
       };
-      videoElement.addEventListener('loadeddata', playVideo);
+      videoElement.addEventListener('loadeddata', startVideo);
     }
-    yield* getNextFrameResult(colorMaps);
+    yield* getNextFrameResult(frameResults);
   }
-  async function* getNextFrameResult(colorMaps) {
-    const frameResult = await colorMaps.next();
+  async function* getNextFrameResult(frameResults) {
+    const frameResult = await frameResults.next();
     if (!frameResult.done) {
       yield frameResult.value;
-      yield* getNextFrameResult(colorMaps);
+      yield* getNextFrameResult(frameResults);
     }
   }
 
   function quantizeVideo(parameters) {
-    return parseVideo(quantizeImage, parameters);
+    const [videoParsingParameters, medianCutBaseParameters] = extractParameters(parameters);
+    const quantizeImageWrapper = (canvasElement) =>
+      quantizeImage(
+        _extends(
+          {
+            imageElement: canvasElement,
+          },
+          medianCutBaseParameters
+        )
+      );
+    return parseVideo(videoParsingParameters, quantizeImageWrapper);
   }
   function reduceVideo(parameters) {
-    return parseVideo(reduceImage, parameters);
+    const [videoParsingParameters, medianCutBaseParameters] = extractParameters(parameters);
+    const reduceImageWrapper = (canvasElement) =>
+      reduceImage(
+        _extends(
+          {
+            imageElement: canvasElement,
+          },
+          medianCutBaseParameters
+        )
+      );
+    return parseVideo(videoParsingParameters, reduceImageWrapper);
+  }
+  function extractParameters(parameters) {
+    const { videoElement, framesPerSecond, numberOfColors, quality } = parameters;
+    return [{ videoElement, framesPerSecond }, { numberOfColors, quality }];
   }
 
   function popularizeVideo(parameters) {
-    return parseVideo(popularizeImage, parameters);
+    const [videoParsingParameters, medianCutBaseParameters] = extractParameters$1(parameters);
+    const popularizeImageWrapper = (canvasElement) =>
+      popularizeImage(
+        _extends(
+          {
+            imageElement: canvasElement,
+          },
+          medianCutBaseParameters
+        )
+      );
+    return parseVideo(videoParsingParameters, popularizeImageWrapper);
+  }
+  function extractParameters$1(parameters) {
+    const { videoElement, framesPerSecond, numberOfColors, quality, regionSize } = parameters;
+    return [{ videoElement, framesPerSecond }, { numberOfColors, quality, regionSize }];
   }
 
   var VideoQuantizationAPI = {

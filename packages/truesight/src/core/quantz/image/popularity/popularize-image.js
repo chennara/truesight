@@ -4,7 +4,7 @@ import { HSLuvImage } from 'core/image/hsluv-image';
 import { HSLuvColor } from 'core/color/hsluv-color';
 import { RGBColor } from 'core/color/rgb-color';
 
-import type { PopularityParameters, RegionSize } from './types';
+import type { PopularityParameters, ValidatedPopularityParameters, RegionSize } from './types';
 import validateParameters from './validate-parameters';
 import mapColorToRegionID from './map-color-to-region-id';
 
@@ -40,7 +40,7 @@ export default async function popularizeImage(parameters: PopularityParameters):
   return colorPalette;
 }
 
-async function extractHSLuvImage(parameters: PopularityParameters): Promise<HSLuvImage> {
+async function extractHSLuvImage(parameters: ValidatedPopularityParameters): Promise<HSLuvImage> {
   return parameters.rgbImage
     ? HSLuvImage.fromRGBImage(parameters.rgbImage, parameters.quality)
     : HSLuvImage.fromImageElement(parameters.imageElement, parameters.quality);

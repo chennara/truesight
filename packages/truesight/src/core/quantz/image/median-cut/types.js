@@ -9,12 +9,29 @@ export type MedianCutParameters = RGBImageConfiguration | ImageElementConfigurat
 // Used for configuring the median cut algorithm from a RGBImage object.
 export type RGBImageConfiguration = {|
   rgbImage: RGBImage,
-  numberOfColors: number,
-  quality: number,
+  numberOfColors?: number,
+  quality?: number,
 |};
 
 // Used for configuring the median cut algorithm from an ImageElement object.
 export type ImageElementConfiguration = {|
+  imageElement: ImageElement,
+  numberOfColors?: number,
+  quality?: number,
+|};
+
+// MedianCutParameters object in which the properties have been validated.
+export type ValidatedMedianCutParameters = ValidatedRGBImageConfiguration | ValidatedImageElementConfiguration;
+
+// RGBImageConfiguration object in which the properties have been validated.
+export type ValidatedRGBImageConfiguration = {|
+  rgbImage: RGBImage,
+  numberOfColors: number,
+  quality: number,
+|};
+
+// ImageElementConfiguration object in which the properties have been validated.
+export type ValidatedImageElementConfiguration = {|
   imageElement: ImageElement,
   numberOfColors: number,
   quality: number,

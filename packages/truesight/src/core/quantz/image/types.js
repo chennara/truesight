@@ -7,7 +7,7 @@ const HIGHEST_QUALITY = 1;
 // The lowest quality for image data extraction, only parses every twenty-fifth pixel.
 const LOWEST_QUALITY = 25;
 
-// Defines an interval of valid quality values.
+// An interval of valid quality values.
 export const VALID_QUALITIES = new Interval(HIGHEST_QUALITY, LOWEST_QUALITY);
 
 // Default number of colors for an image quantization algorithm.

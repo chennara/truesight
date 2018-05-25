@@ -1,13 +1,13 @@
 // @flow
 
-import type { MedianCutParameters } from 'core/quantz/image/median-cut/types';
+import type { ValidatedMedianCutParameters } from 'core/quantz/image/median-cut/types';
 import type { Try } from 'utils/fp/neither';
 import validateMedianCutParameters from 'core/quantz/image/median-cut/validate-parameters';
 
-import type { PopularityParameters } from './types';
+import type { PopularityParameters, ValidatedPopularityParameters } from './types';
 import { DEFAULT_REGION_SIZE } from './types';
 
-export default function validateParameters(parameters: PopularityParameters): Try<PopularityParameters> {
+export default function validateParameters(parameters: PopularityParameters): Try<ValidatedPopularityParameters> {
   const { regionSize = DEFAULT_REGION_SIZE } = parameters;
   const [hue, saturation, lightness] = regionSize;
 
@@ -48,7 +48,7 @@ export default function validateParameters(parameters: PopularityParameters): Tr
   };
 }
 
-function validateBaseParameters(parameters: PopularityParameters): Try<MedianCutParameters> {
+function validateBaseParameters(parameters: PopularityParameters): Try<ValidatedMedianCutParameters> {
   if (parameters.rgbImage) {
     const { rgbImage, numberOfColors, quality } = parameters;
     return validateMedianCutParameters({ rgbImage, numberOfColors, quality });

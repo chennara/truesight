@@ -1,57 +1,50 @@
 // @flow
-
-import type { VideoQuantizationParameters } from 'core/quantz/video/types';
+import type { VideoParsingParameters, ValidatedVideoParsingParameters } from 'core/quantz/video/types';
 import { AsyncQueue } from 'utils/collections/async-queue';
 
 import validateParameters from './validate-parameters';
 import drawFrameToCanvas from './draw-frame-to-canvas';
 
 // Function type that parses a given frame and returns a Promise holding the result.
-export type ParseFrame<T> = (any) => Promise<T>;
+export type ParseFrame<T> = (HTMLCanvasElement) => Promise<T>;
 
-// An asynchronous generator object yielding color maps for a given stream of video frames.
-export type AsyncColorMapGenerator<T> = AsyncGenerator<T, void, void>;
+// An asynchronous generator object yielding parsing results for a given stream of video frames.
+export type AsyncFrameResultGenerator<T> = AsyncGenerator<T, void, void>;
 
 export default async function* parseVideo<T>(
-  parseFrame: ParseFrame<T>,
-  parameters: VideoQuantizationParameters
-): AsyncColorMapGenerator<T> {
+  parameters: VideoParsingParameters,
+  parseFrame: ParseFrame<T>
+): AsyncFrameResultGenerator<T> {
   const validatedParameters = validateParameters(parameters);
 
   if (validatedParameters instanceof Error) {
     throw validatedParameters;
   }
 
-  yield* parseFrames(parseFrame, parameters);
+  yield* parseFrames(validatedParameters, parseFrame);
 }
 
 async function* parseFrames<T>(
-  parseFrame: ParseFrame<T>,
-  parameters: VideoQuantizationParameters
-): AsyncColorMapGenerator<T> {
+  parameters: ValidatedVideoParsingParameters,
+  parseFrame: ParseFrame<T>
+): AsyncFrameResultGenerator<T> {
   const videoElement = parameters.videoElement.cloneNode();
-  const { framesPerSecond, numberOfColors, quality } = parameters;
+  const { framesPerSecond } = parameters;
 
-  const colorMaps = new AsyncQueue();
+  const frameResults = new AsyncQueue();
   let currentTime = 0;
 
   const parseNextFrame = async () => {
     const canvasElement = drawFrameToCanvas(videoElement);
-
-    const colorMap = await parseFrame({
-      imageElement: canvasElement,
-      numberOfColors,
-      quality,
-    });
-
-    colorMaps.enqueue(colorMap);
+    const frameResult = await parseFrame(canvasElement);
+    frameResults.enqueue(frameResult);
 
     currentTime += 1 / framesPerSecond;
 
     if (currentTime <= videoElement.duration) {
       videoElement.currentTime = currentTime;
     } else {
-      colorMaps.close();
+      frameResults.close();
       videoElement.removeEventListener('seeked', parseNextFrame);
     }
   };
@@ -61,22 +54,22 @@ async function* parseFrames<T>(
   if (videoElement.readyState === 4) {
     videoElement.currentTime = 0;
   } else {
-    const playVideo = () => {
+    const startVideo = () => {
       videoElement.currentTime = 0;
-      videoElement.removeEventListener('loadeddata', playVideo);
+      videoElement.removeEventListener('loadeddata', startVideo);
     };
 
-    videoElement.addEventListener('loadeddata', playVideo);
+    videoElement.addEventListener('loadeddata', startVideo);
   }
 
-  yield* getNextFrameResult(colorMaps);
+  yield* getNextFrameResult(frameResults);
 }
 
-async function* getNextFrameResult<T>(colorMaps: AsyncQueue<T>): AsyncColorMapGenerator<T> {
-  const frameResult = await colorMaps.next();
+async function* getNextFrameResult<T>(frameResults: AsyncQueue<T>): AsyncFrameResultGenerator<T> {
+  const frameResult = await frameResults.next();
 
   if (!frameResult.done) {
     yield frameResult.value;
-    yield* getNextFrameResult(colorMaps);
+    yield* getNextFrameResult(frameResults);
   }
 }

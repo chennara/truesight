@@ -3,7 +3,7 @@
 import { RGBImage } from 'core/image/rgb-image';
 import { RGBColor, RED_CHANNEL_INDEX, GREEN_CHANNEL_INDEX, BLUE_CHANNEL_INDEX } from 'core/color/rgb-color';
 
-import type { MedianCutParameters } from './types';
+import type { MedianCutParameters, ValidatedMedianCutParameters } from './types';
 import validateParameters from './validate-parameters';
 
 // Maps each color in the image to its representative color.
@@ -46,7 +46,7 @@ async function runMedianCut<T>(parameters: MedianCutParameters, buildColorMap: (
   return colorMap;
 }
 
-async function extractRGBImage(parameters: MedianCutParameters): Promise<RGBImage> {
+async function extractRGBImage(parameters: ValidatedMedianCutParameters): Promise<RGBImage> {
   return parameters.rgbImage
     ? parameters.rgbImage
     : RGBImage.fromImageElement(parameters.imageElement, parameters.quality);

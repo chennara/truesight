@@ -1,10 +1,10 @@
 // @flow
 
-import type { VideoQuantizationParameters } from 'core/quantz/video/types';
+import type { VideoParsingParameters, ValidatedVideoParsingParameters } from 'core/quantz/video/types';
 import type { Try } from 'utils/fp/neither';
 import { VALID_FRAMES_PER_SECONDS, DEFAULT_FRAMES_PER_SECOND } from 'core/quantz/video/types';
 
-export default function validateParameters(parameters: VideoQuantizationParameters): Try<VideoQuantizationParameters> {
+export default function validateParameters(parameters: VideoParsingParameters): Try<ValidatedVideoParsingParameters> {
   const { videoElement, framesPerSecond = DEFAULT_FRAMES_PER_SECOND } = parameters;
 
   if (!videoElement) {
@@ -21,5 +21,5 @@ export default function validateParameters(parameters: VideoQuantizationParamete
     return new RangeError(`framesPerSecond should lie in ${VALID_FRAMES_PER_SECONDS.toString()}`);
   }
 
-  return Object.assign(parameters, { framesPerSecond });
+  return { videoElement, framesPerSecond };
 }

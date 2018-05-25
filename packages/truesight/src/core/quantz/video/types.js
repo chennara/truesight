@@ -2,15 +2,25 @@
 
 import { Interval } from 'utils/collections/interval';
 
+import type { MedianCutVideoParameters } from './median-cut/types';
+import type { PopularityVideoParameters } from './popularity/types';
+
 // Used for configuring a video quantization algorithm.
-export type VideoQuantizationParameters = {|
+export type VideoQuantizationParameters = MedianCutVideoParameters | PopularityVideoParameters;
+
+// The parameters for a video parsing implementation.
+export type VideoParsingParameters = {|
   videoElement: HTMLVideoElement,
-  framesPerSecond: number,
-  numberOfColors: number,
-  quality: number,
+  framesPerSecond?: number,
 |};
 
-// Defines an interval of valid numbers of frames per second.
+// VideoParsingParameters object in which the properties have been validated.
+export type ValidatedVideoParsingParameters = {|
+  videoElement: HTMLVideoElement,
+  framesPerSecond: number,
+|};
+
+// An interval of valid numbers of frames per second.
 export const VALID_FRAMES_PER_SECONDS = new Interval(1, 24);
 
 // Default number of frames per second to extract.
