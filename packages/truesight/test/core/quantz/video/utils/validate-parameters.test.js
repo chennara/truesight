@@ -2,33 +2,43 @@ import { VALID_FRAMES_PER_SECONDS, DEFAULT_FRAMES_PER_SECOND } from 'core/quantz
 import validateParameters from 'core/quantz/video/utils/validate-parameters';
 
 describe('validating invalid video quantization parameters should return an error', () => {
-  it('should return a RangeError if parameters does not include videoElement property', () => {
+  it('should return a RangeError if parameters argument includes an unknown property', () => {
+    const validatedParameters = validateParameters({
+      videoElement: document.createElement('video'),
+      fps: 4,
+    });
+
+    expect(validatedParameters).to.be.an.instanceof(RangeError);
+    expect(validatedParameters.message).to.equal('parameters argument includes unknown property fps');
+  });
+
+  it('should return a RangeError if parameters argument does not include videoElement property', () => {
     const validatedParameters = validateParameters({});
 
     expect(validatedParameters).to.be.an.instanceof(RangeError);
-    expect(validatedParameters.message).to.equal('parameters should include videoElement property');
+    expect(validatedParameters.message).to.equal('parameters argument should include videoElement property');
   });
 
-  it('should return a TypeError if videoElement is not of type HTMLVideoElementL', () => {
+  it('should return a TypeError if videoElement property is not of type HTMLVideoElementL', () => {
     const validatedParameters = validateParameters({
       videoElement: new Image(),
     });
 
     expect(validatedParameters).to.be.an.instanceof(TypeError);
-    expect(validatedParameters.message).to.equal('videoElement should be of type HTMLVideoElement');
+    expect(validatedParameters.message).to.equal('videoElement property should be of type HTMLVideoElement');
   });
 
-  it('should return a TypeError if framesPerSecond is not an integer', () => {
+  it('should return a TypeError if framesPerSecond property is not an integer', () => {
     const validatedParameters = validateParameters({
       videoElement: document.createElement('video'),
       framesPerSecond: () => 2,
     });
 
     expect(validatedParameters).to.be.an.instanceof(TypeError);
-    expect(validatedParameters.message).to.equal('framesPerSecond should be an integer');
+    expect(validatedParameters.message).to.equal('framesPerSecond property should be an integer');
   });
 
-  it(`should return a RangeError if framesPerSecond does not lie in ${VALID_FRAMES_PER_SECONDS.toString()}`, () => {
+  it(`should return a RangeError if framesPerSecond property does not lie in ${VALID_FRAMES_PER_SECONDS.toString()}`, () => {
     const validatedParameters = validateParameters({
       videoElement: document.createElement('video'),
       framesPerSecond: 25,
@@ -36,13 +46,13 @@ describe('validating invalid video quantization parameters should return an erro
 
     expect(validatedParameters).to.be.an.instanceof(RangeError);
     expect(validatedParameters.message).to.equal(
-      `framesPerSecond should lie in ${VALID_FRAMES_PER_SECONDS.toString()}`
+      `framesPerSecond property should lie in ${VALID_FRAMES_PER_SECONDS.toString()}`
     );
   });
 });
 
 describe('should provide the correct default values for video quantization', () => {
-  it('should provide the default value for framesPerSecond if it was not provided', () => {
+  it('should provide the default value for framesPerSecond property if it was not provided', () => {
     const validatedParameters = validateParameters({
       videoElement: document.createElement('video'),
     });

@@ -12,8 +12,14 @@ import type {
 } from './types';
 
 export default function validateParameters(parameters: MedianCutParameters): Try<ValidatedMedianCutParameters> {
+  const unknownProperties = getUnknownProperties(parameters);
+
+  if (unknownProperties.length !== 0) {
+    return new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`);
+  }
+
   if (!parameters.rgbImage && !parameters.imageElement) {
-    return new RangeError('parameters should include either rgbImage or imageElement property');
+    return new RangeError('parameters argument should include either rgbImage or imageElement property');
   }
 
   if (parameters.rgbImage) {
@@ -24,11 +30,25 @@ export default function validateParameters(parameters: MedianCutParameters): Try
   return validateImageElementConfiguration(parameters);
 }
 
+function getUnknownProperties(parameters: MedianCutParameters): string[] {
+  const properties = Object.keys(parameters);
+
+  const validBaseProperties = ['numberOfColors', 'quality'];
+  const validRGBImageProperties = ['rgbImage', ...validBaseProperties];
+  const validImageElementProperties = ['imageElement', ...validBaseProperties];
+
+  const unknownRGBImageProperties = properties.filter((property) => !validRGBImageProperties.includes(property));
+
+  return unknownRGBImageProperties.length === 0
+    ? unknownRGBImageProperties
+    : properties.filter((property) => !validImageElementProperties.includes(property));
+}
+
 function validateRGBImageConfiguration(parameters: RGBImageConfiguration): Try<ValidatedMedianCutParameters> {
   const { rgbImage } = parameters;
 
   if (!(rgbImage instanceof RGBImage)) {
-    return new TypeError('image should be of type RGBImage');
+    return new TypeError('image property should be of type RGBImage');
   }
 
   return validateBaseConfiguration(parameters);
@@ -38,7 +58,7 @@ function validateImageElementConfiguration(parameters: ImageElementConfiguration
   const { imageElement } = parameters;
 
   if (!(imageElement instanceof HTMLImageElement) && !(imageElement instanceof HTMLCanvasElement)) {
-    return new TypeError('imageElement should be of type HTMLImageElement or HTMLCanvasElement');
+    return new TypeError('imageElement property should be of type HTMLImageElement or HTMLCanvasElement');
   }
 
   return validateBaseConfiguration(parameters);
@@ -48,17 +68,17 @@ function validateBaseConfiguration(parameters: MedianCutParameters): Try<Validat
   const { numberOfColors = DEFAULT_NUMBER_OF_COLORS, quality = DEFAULT_QUALITY } = parameters;
 
   if (!Number.isInteger(numberOfColors)) {
-    return new TypeError('numberOfColors should be an integer');
+    return new TypeError('numberOfColors property should be an integer');
   }
   if (!(numberOfColors >= 1 && numberOfColors <= 256)) {
-    return new RangeError('numberOfColors should lie in [1, 256]');
+    return new RangeError('numberOfColors property should lie in [1, 256]');
   }
 
   if (!Number.isInteger(quality)) {
-    return new TypeError('quality should be an integer');
+    return new TypeError('quality property should be an integer');
   }
   if (!VALID_QUALITIES.liesIn(quality)) {
-    return new RangeError(`quality should lie in ${VALID_QUALITIES.toString()}`);
+    return new RangeError(`quality property should lie in ${VALID_QUALITIES.toString()}`);
   }
 
   if (parameters.rgbImage) {

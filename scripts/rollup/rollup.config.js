@@ -22,8 +22,8 @@ function generateBuildConfiguration(target) {
   if (target && target in builds) {
     build = builds[target];
   } else {
-    throw new TypeError(
-      `TARGET environment should be either ${Object.keys(builds)
+    throw new RangeError(
+      `TARGET environment should be set to either ${Object.keys(builds)
         .map((key) => `'${key}'`)
         .join(' or ')}`
     );

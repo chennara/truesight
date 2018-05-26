@@ -46,15 +46,7 @@ describe('median cut should return a map holding the expected number of colors (
 
   before((done) => {
     const imageElement = new Image();
-
-    const onImageLoad = () => {
-      drawImageToCanvas(imageElement, canvasElement);
-      imageElement.removeEventListener('load', onImageLoad);
-      done();
-    };
-
-    imageElement.addEventListener('load', onImageLoad);
-
+    drawImageToCanvas(imageElement, canvasElement, done);
     imageElement.src = 'base/test/resources/images/the-incredibles_2004.jpg';
   });
 
@@ -103,7 +95,7 @@ function runExpectedNumberOfColorsTests(testSuite) {
 }
 
 describe('median cut should return an error if invalid parameters were provided', () => {
-  it('should return a TypeError if image is not of type RGBImage', async () => {
+  it('should return a TypeError if image property is not of type RGBImage', async () => {
     let errorOccurred = false;
 
     try {
@@ -118,7 +110,7 @@ describe('median cut should return an error if invalid parameters were provided'
     expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
   });
 
-  it('should return a RangeError if numberOfColors does not lie in [1, 256]', async () => {
+  it('should return a RangeError if numberOfColors property does not lie in [1, 256]', async () => {
     let errorOccurred = false;
 
     try {
