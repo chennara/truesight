@@ -875,13 +875,13 @@ class AsyncQueue {
   }
   enqueue(value) {
     if (this.closed) {
-      throw new Error('unable to enqueue an item onto a closed queue');
+      throw new Error('unable to enqueue a task onto a closed queue');
     } else if (this.settlers.length === 0) {
       this.values.push(value);
     } else {
       const settler = this.settlers.shift();
       if (value instanceof Error) {
-        settler.reject(value.message);
+        settler.reject(value);
       } else {
         settler.resolve({ done: false, value });
       }
