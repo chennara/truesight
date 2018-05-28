@@ -1,0 +1,23 @@
+sudo: required
+
+language: node_js
+
+node_js:
+  - "10"
+
+addons:
+  chrome: stable
+
+before_script:
+  - yarn lerna bootstrap
+
+script:
+  - yarn lint
+  - yarn flow-check
+  - yarn test
+
+cache:
+  yarn: true
+  directories:
+    - ".eslintcache"
+    - "node_modules"
