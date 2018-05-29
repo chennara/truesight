@@ -15,6 +15,8 @@ export default async function* parseVideo<T>(
   parameters: VideoParsingParameters,
   parseFrame: ParseFrame<T>
 ): AsyncFrameResultGenerator<T> {
+  await loadVideo(parameters.videoElement);
+
   const validatedParameters = validateParameters(parameters);
 
   if (validatedParameters instanceof Error) {
@@ -24,12 +26,26 @@ export default async function* parseVideo<T>(
   yield* parseFrames(validatedParameters, parseFrame);
 }
 
+function loadVideo(videoElement: HTMLVideoElement): Promise<void> {
+  return new Promise((resolve) => {
+    if (videoElement.readyState === 4) {
+      resolve();
+    } else {
+      const onVideoLoad = () => {
+        resolve();
+        videoElement.removeEventListener('loadeddata', onVideoLoad);
+      };
+
+      videoElement.addEventListener('loadeddata', onVideoLoad);
+    }
+  });
+}
+
 async function* parseFrames<T>(
   parameters: ValidatedVideoParsingParameters,
   parseFrame: ParseFrame<T>
 ): AsyncFrameResultGenerator<T> {
   const videoElement = parameters.videoElement.cloneNode();
-  const { framesPerSecond } = parameters;
 
   const frameResults = new AsyncQueue();
   let currentTime = 0;
@@ -39,7 +55,7 @@ async function* parseFrames<T>(
     const frameResult = await parseFrame(canvasElement);
     frameResults.enqueue(frameResult);
 
-    currentTime += 1 / framesPerSecond;
+    currentTime += 1 / parameters.framesPerSecond;
 
     if (currentTime <= videoElement.duration) {
       videoElement.currentTime = currentTime;

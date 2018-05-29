@@ -937,6 +937,12 @@
     if (!(videoElement instanceof HTMLVideoElement)) {
       return new TypeError('videoElement property should be of type HTMLVideoElement');
     }
+    if (videoElement.width === 0) {
+      return new RangeError('width attribute in videoElement property is 0');
+    }
+    if (videoElement.height === 0) {
+      return new RangeError('height attribute in videoElement property is 0');
+    }
     if (!Number.isInteger(framesPerSecond)) {
       return new TypeError('framesPerSecond property should be an integer');
     }
@@ -961,22 +967,35 @@
   }
 
   var parseVideo = async function* parseVideo(parameters, parseFrame) {
+    await loadVideo(parameters.videoElement);
     const validatedParameters = validateParameters$2(parameters);
     if (validatedParameters instanceof Error) {
       throw validatedParameters;
     }
     yield* parseFrames(validatedParameters, parseFrame);
   };
+  function loadVideo(videoElement) {
+    return new Promise((resolve) => {
+      if (videoElement.readyState === 4) {
+        resolve();
+      } else {
+        const onVideoLoad = () => {
+          resolve();
+          videoElement.removeEventListener('loadeddata', onVideoLoad);
+        };
+        videoElement.addEventListener('loadeddata', onVideoLoad);
+      }
+    });
+  }
   async function* parseFrames(parameters, parseFrame) {
     const videoElement = parameters.videoElement.cloneNode();
-    const { framesPerSecond } = parameters;
     const frameResults = new AsyncQueue();
     let currentTime = 0;
     const parseNextFrame = async () => {
       const canvasElement = drawFrameToCanvas(videoElement);
       const frameResult = await parseFrame(canvasElement);
       frameResults.enqueue(frameResult);
-      currentTime += 1 / framesPerSecond;
+      currentTime += 1 / parameters.framesPerSecond;
       if (currentTime <= videoElement.duration) {
         videoElement.currentTime = currentTime;
       } else {

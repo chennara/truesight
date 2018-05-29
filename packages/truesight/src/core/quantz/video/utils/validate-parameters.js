@@ -20,6 +20,14 @@ export default function validateParameters(parameters: VideoParsingParameters): 
     return new TypeError('videoElement property should be of type HTMLVideoElement');
   }
 
+  // The browser won't dynamically set the width or height attribute value in video elements.
+  if (videoElement.width === 0) {
+    return new RangeError('width attribute in videoElement property is 0');
+  }
+  if (videoElement.height === 0) {
+    return new RangeError('height attribute in videoElement property is 0');
+  }
+
   if (!Number.isInteger(framesPerSecond)) {
     return new TypeError('framesPerSecond property should be an integer');
   }
