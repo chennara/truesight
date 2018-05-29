@@ -13,5 +13,6 @@ module.exports = {
   globals: {
     expect: true,
     should: true,
+    sinon: true,
   },
 };

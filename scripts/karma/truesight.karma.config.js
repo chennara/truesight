@@ -21,6 +21,11 @@ module.exports = (config) => {
         watched: false,
         included: false,
       },
+      {
+        pattern: 'test/resources/videos/*.mp4',
+        watched: false,
+        included: false,
+      },
     ],
     preprocessors: {
       'test/**/*.test.js': ['rollup'],
@@ -45,7 +50,7 @@ module.exports = (config) => {
         }),
       ],
     },
-    frameworks: ['mocha', 'chai'],
+    frameworks: ['mocha', 'chai', 'sinon'],
     reporters: ['mocha', 'coverage'],
     browsers: ['ChromeHeadless'],
     singleRun: true,

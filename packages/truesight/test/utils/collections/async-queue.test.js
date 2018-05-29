@@ -1,5 +1,3 @@
-// @flow
-
 import { AsyncQueue } from 'utils/collections/async-queue';
 
 describe('AsyncQueue should implement an asynchronous task queue', () => {
