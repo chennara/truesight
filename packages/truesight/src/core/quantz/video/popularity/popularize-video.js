@@ -23,7 +23,7 @@ export default function popularizeVideo(
 }
 
 function extractParameters(parameters: PopularityVideoParameters): [VideoParsingParameters, PopularityBaseParameters] {
-  const { videoElement, framesPerSecond, numberOfColors, quality, regionSize } = parameters;
+  const { videoElement, secondsBetweenFrames, numberOfColors, quality, regionSize } = parameters;
 
-  return [{ videoElement, framesPerSecond }, { numberOfColors, quality, regionSize }];
+  return [{ videoElement, secondsBetweenFrames }, { numberOfColors, quality, regionSize }];
 }

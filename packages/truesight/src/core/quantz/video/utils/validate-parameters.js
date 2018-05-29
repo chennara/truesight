@@ -2,7 +2,7 @@
 
 import type { VideoParsingParameters, ValidatedVideoParsingParameters } from 'core/quantz/video/types';
 import type { Try } from 'utils/fp/neither';
-import { VALID_FRAMES_PER_SECONDS, DEFAULT_FRAMES_PER_SECOND } from 'core/quantz/video/types';
+import { DEFAULT_SECONDS_BETWEEN_FRAMES } from 'core/quantz/video/types';
 
 export default function validateParameters(parameters: VideoParsingParameters): Try<ValidatedVideoParsingParameters> {
   const unknownProperties = getUnknownProperties(parameters);
@@ -11,7 +11,7 @@ export default function validateParameters(parameters: VideoParsingParameters): 
     return new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`);
   }
 
-  const { videoElement, framesPerSecond = DEFAULT_FRAMES_PER_SECOND } = parameters;
+  const { videoElement, secondsBetweenFrames = DEFAULT_SECONDS_BETWEEN_FRAMES } = parameters;
 
   if (!videoElement) {
     return new RangeError('parameters argument should include videoElement property');
@@ -28,19 +28,19 @@ export default function validateParameters(parameters: VideoParsingParameters): 
     return new RangeError('height attribute in videoElement property is 0');
   }
 
-  if (!Number.isInteger(framesPerSecond)) {
-    return new TypeError('framesPerSecond property should be an integer');
+  if (!Number.isFinite(secondsBetweenFrames)) {
+    return new TypeError('secondsBetweenFrames property should be a number');
   }
-  if (!VALID_FRAMES_PER_SECONDS.liesIn(framesPerSecond)) {
-    return new RangeError(`framesPerSecond property should lie in ${VALID_FRAMES_PER_SECONDS.toString()}`);
+  if (secondsBetweenFrames <= 0) {
+    return new RangeError('secondsBetweenFrames property should be greater than 0');
   }
 
-  return { videoElement, framesPerSecond };
+  return { videoElement, secondsBetweenFrames };
 }
 
 function getUnknownProperties(parameters: VideoParsingParameters): string[] {
   const properties = Object.keys(parameters);
-  const validProperties = ['videoElement', 'framesPerSecond'];
+  const validProperties = ['videoElement', 'secondsBetweenFrames'];
 
   return properties.filter((property) => !validProperties.includes(property));
 }

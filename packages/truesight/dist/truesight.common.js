@@ -913,15 +913,14 @@ class AsyncQueue {
   }
 }
 
-const VALID_FRAMES_PER_SECONDS = new Interval(1, 24);
-const DEFAULT_FRAMES_PER_SECOND = 1;
+const DEFAULT_SECONDS_BETWEEN_FRAMES = 1;
 
 function validateParameters$2(parameters) {
   const unknownProperties = getUnknownProperties$2(parameters);
   if (unknownProperties.length !== 0) {
     return new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`);
   }
-  const { videoElement, framesPerSecond = DEFAULT_FRAMES_PER_SECOND } = parameters;
+  const { videoElement, secondsBetweenFrames = DEFAULT_SECONDS_BETWEEN_FRAMES } = parameters;
   if (!videoElement) {
     return new RangeError('parameters argument should include videoElement property');
   }
@@ -934,17 +933,17 @@ function validateParameters$2(parameters) {
   if (videoElement.height === 0) {
     return new RangeError('height attribute in videoElement property is 0');
   }
-  if (!Number.isInteger(framesPerSecond)) {
-    return new TypeError('framesPerSecond property should be an integer');
+  if (!Number.isFinite(secondsBetweenFrames)) {
+    return new TypeError('secondsBetweenFrames property should be a number');
   }
-  if (!VALID_FRAMES_PER_SECONDS.liesIn(framesPerSecond)) {
-    return new RangeError(`framesPerSecond property should lie in ${VALID_FRAMES_PER_SECONDS.toString()}`);
+  if (secondsBetweenFrames <= 0) {
+    return new RangeError('secondsBetweenFrames property should be greater than 0');
   }
-  return { videoElement, framesPerSecond };
+  return { videoElement, secondsBetweenFrames };
 }
 function getUnknownProperties$2(parameters) {
   const properties = Object.keys(parameters);
-  const validProperties = ['videoElement', 'framesPerSecond'];
+  const validProperties = ['videoElement', 'secondsBetweenFrames'];
   return properties.filter((property) => !validProperties.includes(property));
 }
 
@@ -979,14 +978,16 @@ function loadVideo(videoElement) {
   });
 }
 async function* parseFrames(parameters, parseFrame) {
-  const videoElement = parameters.videoElement.cloneNode();
   const frameResults = new AsyncQueue();
+  const videoElement = parameters.videoElement.cloneNode();
+  await loadVideo(videoElement);
   let currentTime = 0;
+  videoElement.currentTime = currentTime;
   const parseNextFrame = async () => {
     const canvasElement = drawFrameToCanvas(videoElement);
     const frameResult = await parseFrame(canvasElement);
     frameResults.enqueue(frameResult);
-    currentTime += 1 / parameters.framesPerSecond;
+    currentTime += parameters.secondsBetweenFrames;
     if (currentTime <= videoElement.duration) {
       videoElement.currentTime = currentTime;
     } else {
@@ -995,15 +996,6 @@ async function* parseFrames(parameters, parseFrame) {
     }
   };
   videoElement.addEventListener('seeked', parseNextFrame);
-  if (videoElement.readyState === 4) {
-    videoElement.currentTime = 0;
-  } else {
-    const startVideo = () => {
-      videoElement.currentTime = 0;
-      videoElement.removeEventListener('loadeddata', startVideo);
-    };
-    videoElement.addEventListener('loadeddata', startVideo);
-  }
   yield* getNextFrameResult(frameResults);
 }
 async function* getNextFrameResult(frameResults) {
@@ -1041,8 +1033,8 @@ function reduceVideo(parameters) {
   return parseVideo(videoParsingParameters, reduceImageWrapper);
 }
 function extractParameters(parameters) {
-  const { videoElement, framesPerSecond, numberOfColors, quality } = parameters;
-  return [{ videoElement, framesPerSecond }, { numberOfColors, quality }];
+  const { videoElement, secondsBetweenFrames, numberOfColors, quality } = parameters;
+  return [{ videoElement, secondsBetweenFrames }, { numberOfColors, quality }];
 }
 
 function popularizeVideo(parameters) {
@@ -1059,8 +1051,8 @@ function popularizeVideo(parameters) {
   return parseVideo(videoParsingParameters, popularizeImageWrapper);
 }
 function extractParameters$1(parameters) {
-  const { videoElement, framesPerSecond, numberOfColors, quality, regionSize } = parameters;
-  return [{ videoElement, framesPerSecond }, { numberOfColors, quality, regionSize }];
+  const { videoElement, secondsBetweenFrames, numberOfColors, quality, regionSize } = parameters;
+  return [{ videoElement, secondsBetweenFrames }, { numberOfColors, quality, regionSize }];
 }
 
 var VideoQuantizationAPI = {

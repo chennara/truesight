@@ -45,17 +45,20 @@ async function* parseFrames<T>(
   parameters: ValidatedVideoParsingParameters,
   parseFrame: ParseFrame<T>
 ): AsyncFrameResultGenerator<T> {
-  const videoElement = parameters.videoElement.cloneNode();
-
   const frameResults = new AsyncQueue();
+
+  const videoElement = parameters.videoElement.cloneNode();
+  await loadVideo(videoElement);
+
   let currentTime = 0;
+  videoElement.currentTime = currentTime;
 
   const parseNextFrame = async () => {
     const canvasElement = drawFrameToCanvas(videoElement);
     const frameResult = await parseFrame(canvasElement);
     frameResults.enqueue(frameResult);
 
-    currentTime += 1 / parameters.framesPerSecond;
+    currentTime += parameters.secondsBetweenFrames;
 
     if (currentTime <= videoElement.duration) {
       videoElement.currentTime = currentTime;
@@ -66,17 +69,6 @@ async function* parseFrames<T>(
   };
 
   videoElement.addEventListener('seeked', parseNextFrame);
-
-  if (videoElement.readyState === 4) {
-    videoElement.currentTime = 0;
-  } else {
-    const startVideo = () => {
-      videoElement.currentTime = 0;
-      videoElement.removeEventListener('loadeddata', startVideo);
-    };
-
-    videoElement.addEventListener('loadeddata', startVideo);
-  }
 
   yield* getNextFrameResult(frameResults);
 }

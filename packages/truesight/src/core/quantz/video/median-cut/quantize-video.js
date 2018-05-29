@@ -33,7 +33,7 @@ export function reduceVideo(parameters: MedianCutVideoParameters): AsyncFrameRes
 }
 
 function extractParameters(parameters: MedianCutVideoParameters): [VideoParsingParameters, MedianCutBaseParameters] {
-  const { videoElement, framesPerSecond, numberOfColors, quality } = parameters;
+  const { videoElement, secondsBetweenFrames, numberOfColors, quality } = parameters;
 
-  return [{ videoElement, framesPerSecond }, { numberOfColors, quality }];
+  return [{ videoElement, secondsBetweenFrames }, { numberOfColors, quality }];
 }
