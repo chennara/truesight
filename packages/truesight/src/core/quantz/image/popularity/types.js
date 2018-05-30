@@ -5,7 +5,7 @@ import type {
   ImageElementConfiguration as ImageElementBaseConfiguration,
   ValidatedRGBImageConfiguration as ValidatedRGBImageBaseConfiguration,
   ValidatedImageElementConfiguration as ValidatedImageElementBaseConfiguration,
-} from 'core/quantz/image/median-cut/types';
+} from '../median-cut/types';
 
 // Used for configuring the popularity algorithm.
 export type PopularityParameters = RGBImageConfiguration | ImageElementConfiguration;

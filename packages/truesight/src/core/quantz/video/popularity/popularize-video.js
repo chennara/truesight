@@ -1,10 +1,11 @@
 // @flow
 
-import type { VideoParsingParameters } from 'core/quantz/video/types';
-import type { AsyncFrameResultGenerator } from 'core/quantz/video/utils/parse-video';
 import type { ColorPalette } from 'core/quantz/image/popularity/popularize-image';
-import parseVideo from 'core/quantz/video/utils/parse-video';
 import popularizeImage from 'core/quantz/image/popularity/popularize-image';
+
+import type { VideoParsingParameters } from '../types';
+import type { AsyncFrameResultGenerator } from '../utils/parse-video';
+import parseVideo from '../utils/parse-video';
 
 import type { PopularityVideoParameters, PopularityBaseParameters } from './types';
 

@@ -1,6 +1,7 @@
 // @flow
 
 import type { ImageElement } from './image-element';
+import loadImage from './load-image';
 
 export default async function getImageData(imageElement: ImageElement): Promise<Uint8ClampedArray> {
   if (imageElement instanceof HTMLImageElement) {
@@ -11,21 +12,13 @@ export default async function getImageData(imageElement: ImageElement): Promise<
   return getImageDataFromHTMLCanvasElement(imageElement);
 }
 
-function getImageDataFromHTMLImageElement(imageElement: HTMLImageElement): Promise<Uint8ClampedArray> {
-  return new Promise((resolve) => {
-    if (imageElement.complete) {
-      const canvasElement = drawImageToCanvas(imageElement);
-      resolve(getImageDataFromHTMLCanvasElement(canvasElement));
-    } else {
-      const onImageLoad = () => {
-        const canvasElement = drawImageToCanvas(imageElement);
-        resolve(getImageDataFromHTMLCanvasElement(canvasElement));
-        imageElement.removeEventListener('load', onImageLoad);
-      };
+async function getImageDataFromHTMLImageElement(imageElement: HTMLImageElement): Promise<Uint8ClampedArray> {
+  await loadImage(imageElement);
 
-      imageElement.addEventListener('load', onImageLoad);
-    }
-  });
+  const canvasElement = drawImageToCanvas(imageElement);
+  const imageData = getImageDataFromHTMLCanvasElement(canvasElement);
+
+  return imageData;
 }
 
 function drawImageToCanvas(imageElement: HTMLImageElement): HTMLCanvasElement {

@@ -1,8 +1,9 @@
 import { RGBColor } from 'core/color/rgb-color';
 import { quantizeImage, reduceImage } from 'core/quantz/image/median-cut/quantize-image';
+import loadImage from 'core/image/load-image';
 
 import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image';
-import drawImageToCanvas from '../test-utils/draw-image-to-canvas';
+import drawImageToCanvasTestUtil from '../test-utils/draw-image-to-canvas';
 import checkIfSimilarColors from '../test-utils/check-if-similar-colors';
 
 describe('median cut should return a map holding the expected number of colors (RGBImage)', () => {
@@ -44,10 +45,12 @@ describe('median cut should return a map holding the expected number of colors (
   const imageSize = 675 * 1000;
   const canvasElement = document.createElement('canvas');
 
-  before((done) => {
+  before(async () => {
     const imageElement = new Image();
-    drawImageToCanvas(imageElement, canvasElement, done);
     imageElement.src = 'base/test/resources/images/the-incredibles_2004.jpg';
+
+    await loadImage(imageElement);
+    drawImageToCanvasTestUtil(imageElement, canvasElement);
   });
 
   const testSuite = {

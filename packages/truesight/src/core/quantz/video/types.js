@@ -1,12 +1,6 @@
 // @flow
 
-import type { MedianCutVideoParameters } from './median-cut/types';
-import type { PopularityVideoParameters } from './popularity/types';
-
-// Used for configuring a video quantization algorithm.
-export type VideoQuantizationParameters = MedianCutVideoParameters | PopularityVideoParameters;
-
-// The parameters for a video parsing implementation.
+// Used for configuring a video parsing implementation.
 export type VideoParsingParameters = {|
   videoElement: HTMLVideoElement,
   secondsBetweenFrames?: number,

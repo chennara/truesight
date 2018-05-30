@@ -1,8 +1,9 @@
 import { RGBColor } from 'core/color/rgb-color';
 import popularizeImage from 'core/quantz/image/popularity/popularize-image';
+import loadImage from 'core/image/load-image';
 
 import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image';
-import drawImageToCanvas from '../test-utils/draw-image-to-canvas';
+import drawImageToCanvasTestUtil from '../test-utils/draw-image-to-canvas';
 import checkIfSimilarColors from '../test-utils/check-if-similar-colors';
 
 describe('popularizeImage should return a palette holding the expected number of colors (RGBImage)', () => {
@@ -38,10 +39,12 @@ describe('popularizeImage should return a palette holding the expected number of
 describe('popularizeImage should return a palette holding the expected number of colors (HTMLCanvasElement)', () => {
   const canvasElement = document.createElement('canvas');
 
-  before((done) => {
+  before(async () => {
     const imageElement = new Image();
-    drawImageToCanvas(imageElement, canvasElement, done);
     imageElement.src = 'base/test/resources/images/the-incredibles_2004.jpg';
+
+    await loadImage(imageElement);
+    drawImageToCanvasTestUtil(imageElement, canvasElement);
   });
 
   it('should return a palette holding the expected number of colors', async () => {

@@ -404,26 +404,31 @@ const RED_CHANNEL_INDEX = 0;
 const GREEN_CHANNEL_INDEX = 1;
 const BLUE_CHANNEL_INDEX = 2;
 
+var loadImage = async function loadImage(imageElement) {
+  return new Promise((resolve) => {
+    if (imageElement.complete) {
+      resolve();
+    } else {
+      const onImageLoad = () => {
+        resolve();
+        imageElement.removeEventListener('load', onImageLoad);
+      };
+      imageElement.addEventListener('load', onImageLoad);
+    }
+  });
+};
+
 var getImageData = async function getImageData(imageElement) {
   if (imageElement instanceof HTMLImageElement) {
     return getImageDataFromHTMLImageElement(imageElement);
   }
   return getImageDataFromHTMLCanvasElement(imageElement);
 };
-function getImageDataFromHTMLImageElement(imageElement) {
-  return new Promise((resolve) => {
-    if (imageElement.complete) {
-      const canvasElement = drawImageToCanvas(imageElement);
-      resolve(getImageDataFromHTMLCanvasElement(canvasElement));
-    } else {
-      const onImageLoad = () => {
-        const canvasElement = drawImageToCanvas(imageElement);
-        resolve(getImageDataFromHTMLCanvasElement(canvasElement));
-        imageElement.removeEventListener('load', onImageLoad);
-      };
-      imageElement.addEventListener('load', onImageLoad);
-    }
-  });
+async function getImageDataFromHTMLImageElement(imageElement) {
+  await loadImage(imageElement);
+  const canvasElement = drawImageToCanvas(imageElement);
+  const imageData = getImageDataFromHTMLCanvasElement(canvasElement);
+  return imageData;
 }
 function drawImageToCanvas(imageElement) {
   const canvasElement = document.createElement('canvas');
@@ -913,6 +918,20 @@ class AsyncQueue {
   }
 }
 
+function loadVideo(videoElement) {
+  return new Promise((resolve) => {
+    if (videoElement.readyState === 4) {
+      resolve();
+    } else {
+      const onVideoLoad = () => {
+        resolve();
+        videoElement.removeEventListener('loadeddata', onVideoLoad);
+      };
+      videoElement.addEventListener('loadeddata', onVideoLoad);
+    }
+  });
+}
+
 const DEFAULT_SECONDS_BETWEEN_FRAMES = 1;
 
 function validateParameters$2(parameters) {
@@ -947,15 +966,6 @@ function getUnknownProperties$2(parameters) {
   return properties.filter((property) => !validProperties.includes(property));
 }
 
-function drawFrameToCanvas(videoElement) {
-  const canvasElement = document.createElement('canvas');
-  canvasElement.width = videoElement.width;
-  canvasElement.height = videoElement.height;
-  const canvasContext = canvasElement.getContext('2d');
-  canvasContext.drawImage(videoElement, 0, 0, videoElement.width, videoElement.height);
-  return canvasElement;
-}
-
 var parseVideo = async function* parseVideo(parameters, parseFrame) {
   await loadVideo(parameters.videoElement);
   const validatedParameters = validateParameters$2(parameters);
@@ -964,22 +974,10 @@ var parseVideo = async function* parseVideo(parameters, parseFrame) {
   }
   yield* parseFrames(validatedParameters, parseFrame);
 };
-function loadVideo(videoElement) {
-  return new Promise((resolve) => {
-    if (videoElement.readyState === 4) {
-      resolve();
-    } else {
-      const onVideoLoad = () => {
-        resolve();
-        videoElement.removeEventListener('loadeddata', onVideoLoad);
-      };
-      videoElement.addEventListener('loadeddata', onVideoLoad);
-    }
-  });
-}
 async function* parseFrames(parameters, parseFrame) {
   const frameResults = new AsyncQueue();
   const videoElement = parameters.videoElement.cloneNode();
+  videoElement.preload = 'auto';
   await loadVideo(videoElement);
   let currentTime = 0;
   videoElement.currentTime = currentTime;
@@ -997,6 +995,14 @@ async function* parseFrames(parameters, parseFrame) {
   };
   videoElement.addEventListener('seeked', parseNextFrame);
   yield* getNextFrameResult(frameResults);
+}
+function drawFrameToCanvas(videoElement) {
+  const canvasElement = document.createElement('canvas');
+  canvasElement.width = videoElement.width;
+  canvasElement.height = videoElement.height;
+  const canvasContext = canvasElement.getContext('2d');
+  canvasContext.drawImage(videoElement, 0, 0, videoElement.width, videoElement.height);
+  return canvasElement;
 }
 async function* getNextFrameResult(frameResults) {
   const frameResult = await frameResults.next();

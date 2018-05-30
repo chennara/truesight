@@ -1,8 +1,9 @@
 // @flow
 
-import type { ValidatedMedianCutParameters } from 'core/quantz/image/median-cut/types';
 import type { Try } from 'utils/fp/neither';
-import validateMedianCutParameters from 'core/quantz/image/median-cut/validate-parameters';
+
+import type { ValidatedMedianCutParameters } from '../median-cut/types';
+import validateMedianCutParameters from '../median-cut/validate-parameters';
 
 import type { PopularityParameters, ValidatedPopularityParameters } from './types';
 import { DEFAULT_REGION_SIZE } from './types';

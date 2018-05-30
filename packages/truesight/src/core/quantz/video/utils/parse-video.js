@@ -1,9 +1,10 @@
 // @flow
-import type { VideoParsingParameters, ValidatedVideoParsingParameters } from 'core/quantz/video/types';
 import { AsyncQueue } from 'utils/collections/async-queue';
+import loadVideo from 'core/video/load-video';
+
+import type { VideoParsingParameters, ValidatedVideoParsingParameters } from '../types';
 
 import validateParameters from './validate-parameters';
-import drawFrameToCanvas from './draw-frame-to-canvas';
 
 // Function type that parses a given frame and returns a Promise holding the result.
 export type ParseFrame<T> = (HTMLCanvasElement) => Promise<T>;
@@ -26,21 +27,6 @@ export default async function* parseVideo<T>(
   yield* parseFrames(validatedParameters, parseFrame);
 }
 
-function loadVideo(videoElement: HTMLVideoElement): Promise<void> {
-  return new Promise((resolve) => {
-    if (videoElement.readyState === 4) {
-      resolve();
-    } else {
-      const onVideoLoad = () => {
-        resolve();
-        videoElement.removeEventListener('loadeddata', onVideoLoad);
-      };
-
-      videoElement.addEventListener('loadeddata', onVideoLoad);
-    }
-  });
-}
-
 async function* parseFrames<T>(
   parameters: ValidatedVideoParsingParameters,
   parseFrame: ParseFrame<T>
@@ -48,6 +34,8 @@ async function* parseFrames<T>(
   const frameResults = new AsyncQueue();
 
   const videoElement = parameters.videoElement.cloneNode();
+
+  videoElement.preload = 'auto';
   await loadVideo(videoElement);
 
   let currentTime = 0;
@@ -71,6 +59,17 @@ async function* parseFrames<T>(
   videoElement.addEventListener('seeked', parseNextFrame);
 
   yield* getNextFrameResult(frameResults);
+}
+
+function drawFrameToCanvas(videoElement: HTMLVideoElement): HTMLCanvasElement {
+  const canvasElement = document.createElement('canvas');
+  canvasElement.width = videoElement.width;
+  canvasElement.height = videoElement.height;
+
+  const canvasContext = canvasElement.getContext('2d');
+  canvasContext.drawImage(videoElement, 0, 0, videoElement.width, videoElement.height);
+
+  return canvasElement;
 }
 
 async function* getNextFrameResult<T>(frameResults: AsyncQueue<T>): AsyncFrameResultGenerator<T> {

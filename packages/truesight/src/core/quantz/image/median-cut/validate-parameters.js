@@ -2,7 +2,8 @@
 
 import type { Try } from 'utils/fp/neither';
 import { RGBImage } from 'core/image/rgb-image';
-import { VALID_QUALITIES, DEFAULT_QUALITY, DEFAULT_NUMBER_OF_COLORS } from 'core/quantz/image/types';
+
+import { VALID_QUALITIES, DEFAULT_QUALITY, DEFAULT_NUMBER_OF_COLORS } from '../types';
 
 import type {
   MedianCutParameters,

@@ -2,7 +2,8 @@
 
 import type { ImageElement } from 'core/image/image-element';
 import type { ImageElementConfiguration } from 'core/quantz/image/popularity/types';
-import type { VideoParsingParameters } from 'core/quantz/video/types';
+
+import type { VideoParsingParameters } from '../types';
 
 // Used for configuring the popularity algorithm in a video quantization configuration.
 export type PopularityVideoParameters = {|

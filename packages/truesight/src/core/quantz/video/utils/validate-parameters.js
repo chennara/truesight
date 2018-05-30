@@ -1,8 +1,9 @@
 // @flow
 
-import type { VideoParsingParameters, ValidatedVideoParsingParameters } from 'core/quantz/video/types';
 import type { Try } from 'utils/fp/neither';
-import { DEFAULT_SECONDS_BETWEEN_FRAMES } from 'core/quantz/video/types';
+
+import type { VideoParsingParameters, ValidatedVideoParsingParameters } from '../types';
+import { DEFAULT_SECONDS_BETWEEN_FRAMES } from '../types';
 
 export default function validateParameters(parameters: VideoParsingParameters): Try<ValidatedVideoParsingParameters> {
   const unknownProperties = getUnknownProperties(parameters);

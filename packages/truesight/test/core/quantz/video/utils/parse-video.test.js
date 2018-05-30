@@ -62,7 +62,7 @@ describe('parseVideo should return an error if invalid parameters were provided'
   it('should return a RangeError if secondsBetweenFrames is not greater than 0', async () => {
     const videoParsingParameters = {
       videoElement: createVideoElement(90, 90, 'base/test/resources/videos/city.mp4'),
-      secondsBetweenFrames: 0,
+      secondsBetweenFrames: -9,
     };
 
     const frameResults = parseVideo(videoParsingParameters, sinon.fake());
