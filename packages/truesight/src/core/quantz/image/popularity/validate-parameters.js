@@ -15,11 +15,12 @@ export default function validateParameters(parameters: PopularityParameters): Tr
   }
 
   const { regionSize = DEFAULT_REGION_SIZE } = parameters;
-  const [hue, saturation, lightness] = regionSize;
 
   if (regionSize.length !== 3) {
     return new TypeError('regionSize property should be of type [number, number, number]');
   }
+
+  const [hue, saturation, lightness] = regionSize;
 
   if (!Number.isInteger(hue)) {
     return new TypeError('hue in regionSize property should be an integer');

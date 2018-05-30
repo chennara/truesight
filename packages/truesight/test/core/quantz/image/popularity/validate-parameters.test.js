@@ -26,7 +26,7 @@ describe('validating invalid popularity parameters should return an error', () =
   it('should return a TypeError if regionSize property is not of type [number, number, number]', () => {
     const validatedParameters = validateParameters({
       imageElement: new Image(),
-      regionSize: [10, 20],
+      regionSize: 17,
     });
 
     expect(validatedParameters).to.be.an.instanceof(TypeError);

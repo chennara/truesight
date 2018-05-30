@@ -58,8 +58,8 @@ async function collect(iterable) {
   return result;
 }
 
-describe('parseVideo should return an error if invalid parsing parameters were provided', () => {
-  it('should return a RangeError if secondsBetweenFrames is 0', async () => {
+describe('parseVideo should return an error if invalid parameters were provided', () => {
+  it('should return a RangeError if secondsBetweenFrames is not greater than 0', async () => {
     const videoParsingParameters = {
       videoElement: createVideoElement(90, 90, 'base/test/resources/videos/city.mp4'),
       secondsBetweenFrames: 0,

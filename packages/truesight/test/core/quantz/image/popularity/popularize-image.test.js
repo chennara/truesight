@@ -69,12 +69,13 @@ describe('popularizeImage should return an error if invalid parameters were prov
     expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
   });
 
-  it('should return a TypeError if image property is not of type RGBImage', async () => {
+  it('should return a TypeError if regionSize property is not of type [number, number, number]', async () => {
     let errorOccurred = false;
 
     try {
       await popularizeImage({
-        rgbImage: [],
+        imageElement: new Image(),
+        regionSize: [10, 20],
       });
     } catch (error) {
       expect(error).to.be.an.instanceof(TypeError);
