@@ -41,9 +41,10 @@ describe('AsyncQueue should implement an asynchronous task queue', () => {
     try {
       await tasks.next();
     } catch (error) {
+      errorOccurred = true;
+
       expect(error).to.be.a('error');
       expect(error.message).to.equal('train caught fire');
-      errorOccurred = true;
     }
 
     expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
@@ -73,9 +74,10 @@ describe('AsyncQueue should implement an asynchronous task queue', () => {
     try {
       tasks.enqueue(3);
     } catch (error) {
+      errorOccurred = true;
+
       expect(error).to.be.a('error');
       expect(error.message).to.equal('unable to enqueue a task onto a closed queue');
-      errorOccurred = true;
     }
 
     expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions

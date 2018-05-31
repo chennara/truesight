@@ -965,15 +965,15 @@ function getUnknownProperties$2(parameters) {
 }
 
 var parseVideo = async function* parseVideo(parameters, parseFrame) {
-  await loadVideo(parameters.videoElement);
   const validatedParameters = validateParameters$2(parameters);
   if (validatedParameters instanceof Error) {
     throw validatedParameters;
   }
+  await loadVideo(parameters.videoElement);
   yield* parseFrames(validatedParameters, parseFrame);
 };
 async function* parseFrames(parameters, parseFrame) {
-  const frameResults = new AsyncQueue();
+  const parsingResults = new AsyncQueue();
   const videoElement = parameters.videoElement.cloneNode();
   videoElement.preload = 'auto';
   await loadVideo(videoElement);
@@ -981,18 +981,18 @@ async function* parseFrames(parameters, parseFrame) {
   videoElement.currentTime = currentTime;
   const parseNextFrame = async () => {
     const canvasElement = drawFrameToCanvas(videoElement);
-    const frameResult = await parseFrame(canvasElement);
-    frameResults.enqueue(frameResult);
+    const parsingResult = await parseFrame(canvasElement);
+    parsingResults.enqueue(parsingResult);
     currentTime += parameters.secondsBetweenFrames;
     if (currentTime <= videoElement.duration) {
       videoElement.currentTime = currentTime;
     } else {
-      frameResults.close();
+      parsingResults.close();
       videoElement.removeEventListener('seeked', parseNextFrame);
     }
   };
   videoElement.addEventListener('seeked', parseNextFrame);
-  yield* getNextFrameResult(frameResults);
+  yield* getNextParsingResult(parsingResults);
 }
 function drawFrameToCanvas(videoElement) {
   const canvasElement = document.createElement('canvas');
@@ -1002,11 +1002,11 @@ function drawFrameToCanvas(videoElement) {
   canvasContext.drawImage(videoElement, 0, 0, videoElement.width, videoElement.height);
   return canvasElement;
 }
-async function* getNextFrameResult(frameResults) {
-  const frameResult = await frameResults.next();
-  if (!frameResult.done) {
-    yield frameResult.value;
-    yield* getNextFrameResult(frameResults);
+async function* getNextParsingResult(parsingResults) {
+  const parsingResult = await parsingResults.next();
+  if (!parsingResult.done) {
+    yield parsingResult.value;
+    yield* getNextParsingResult(parsingResults);
   }
 }
 

@@ -6,6 +6,41 @@ import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image'
 import drawImageToCanvasTestUtil from '../test-utils/draw-image-to-canvas';
 import checkIfSimilarColors from '../test-utils/check-if-similar-colors';
 
+describe('median cut should return an error if invalid image quantization parameters were provided', () => {
+  it('should return a TypeError if image property is not of type RGBImage', async () => {
+    let errorOccurred = false;
+
+    try {
+      await quantizeImage({
+        rgbImage: [],
+      });
+    } catch (error) {
+      errorOccurred = true;
+
+      expect(error).to.be.an.instanceof(TypeError);
+    }
+
+    expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
+  });
+
+  it('should return a RangeError if numberOfColors property does not lie in [1, 256]', async () => {
+    let errorOccurred = false;
+
+    try {
+      await reduceImage({
+        imageElement: new Image(),
+        numberOfColors: -2,
+      });
+    } catch (error) {
+      errorOccurred = true;
+
+      expect(error).to.be.an.instanceof(RangeError);
+    }
+
+    expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
+  });
+});
+
 describe('median cut should return a map holding the expected number of colors (RGBImage)', () => {
   const imageSize = 2 ** 10;
   const rgbImage = createRandomizedRGBImage(imageSize);
@@ -97,39 +132,6 @@ function runExpectedNumberOfColorsTests(testSuite) {
   });
 }
 
-describe('median cut should return an error if invalid parameters were provided', () => {
-  it('should return a TypeError if image property is not of type RGBImage', async () => {
-    let errorOccurred = false;
-
-    try {
-      await quantizeImage({
-        rgbImage: [],
-      });
-    } catch (error) {
-      expect(error).to.be.an.instanceof(TypeError);
-      errorOccurred = true;
-    }
-
-    expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
-  });
-
-  it('should return a RangeError if numberOfColors property does not lie in [1, 256]', async () => {
-    let errorOccurred = false;
-
-    try {
-      await reduceImage({
-        imageElement: new Image(),
-        numberOfColors: -2,
-      });
-    } catch (error) {
-      expect(error).to.be.an.instanceof(RangeError);
-      errorOccurred = true;
-    }
-
-    expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
-  });
-});
-
 describe('reduceImage should return a map holding the most dominant colors', () => {
   const imageElement = new Image();
   imageElement.src = 'base/test/resources/images/baby-driver_2017.jpg';
@@ -143,10 +145,12 @@ describe('reduceImage should return a map holding the most dominant colors', () 
 
     const pinkishColor = new RGBColor([226, 75, 108]);
     const pinkishColorWasFound = inverseColorMap.some((entry) => checkIfSimilarColors(entry.color, pinkishColor));
+
     expect(pinkishColorWasFound).to.be.true; // eslint-disable-line no-unused-expressions
 
     const brownishColor = new RGBColor([150, 113, 87]);
     const brownishColorWasFound = inverseColorMap.some((entry) => checkIfSimilarColors(entry.color, brownishColor));
+
     expect(brownishColorWasFound).to.be.true; // eslint-disable-line no-unused-expressions
   });
 });

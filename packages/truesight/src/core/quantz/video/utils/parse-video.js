@@ -16,13 +16,13 @@ export default async function* parseVideo<T>(
   parameters: VideoParsingParameters,
   parseFrame: ParseFrame<T>
 ): AsyncFrameResultGenerator<T> {
-  await loadVideo(parameters.videoElement);
-
   const validatedParameters = validateParameters(parameters);
 
   if (validatedParameters instanceof Error) {
     throw validatedParameters;
   }
+
+  await loadVideo(parameters.videoElement);
 
   yield* parseFrames(validatedParameters, parseFrame);
 }
@@ -31,7 +31,7 @@ async function* parseFrames<T>(
   parameters: ValidatedVideoParsingParameters,
   parseFrame: ParseFrame<T>
 ): AsyncFrameResultGenerator<T> {
-  const frameResults = new AsyncQueue();
+  const parsingResults = new AsyncQueue();
 
   const videoElement = parameters.videoElement.cloneNode();
 
@@ -43,22 +43,22 @@ async function* parseFrames<T>(
 
   const parseNextFrame = async () => {
     const canvasElement = drawFrameToCanvas(videoElement);
-    const frameResult = await parseFrame(canvasElement);
-    frameResults.enqueue(frameResult);
+    const parsingResult = await parseFrame(canvasElement);
+    parsingResults.enqueue(parsingResult);
 
     currentTime += parameters.secondsBetweenFrames;
 
     if (currentTime <= videoElement.duration) {
       videoElement.currentTime = currentTime;
     } else {
-      frameResults.close();
+      parsingResults.close();
       videoElement.removeEventListener('seeked', parseNextFrame);
     }
   };
 
   videoElement.addEventListener('seeked', parseNextFrame);
 
-  yield* getNextFrameResult(frameResults);
+  yield* getNextParsingResult(parsingResults);
 }
 
 function drawFrameToCanvas(videoElement: HTMLVideoElement): HTMLCanvasElement {
@@ -72,11 +72,11 @@ function drawFrameToCanvas(videoElement: HTMLVideoElement): HTMLCanvasElement {
   return canvasElement;
 }
 
-async function* getNextFrameResult<T>(frameResults: AsyncQueue<T>): AsyncFrameResultGenerator<T> {
-  const frameResult = await frameResults.next();
+async function* getNextParsingResult<T>(parsingResults: AsyncQueue<T>): AsyncFrameResultGenerator<T> {
+  const parsingResult = await parsingResults.next();
 
-  if (!frameResult.done) {
-    yield frameResult.value;
-    yield* getNextFrameResult(frameResults);
+  if (!parsingResult.done) {
+    yield parsingResult.value;
+    yield* getNextParsingResult(parsingResults);
   }
 }

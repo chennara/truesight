@@ -1,6 +1,7 @@
 import parseVideo from 'core/quantz/video/utils/parse-video';
 
 import createVideoElement from '../test-utils/create-video-element';
+import collect from '../test-utils/async-collect';
 
 describe('parseVideo should parse the correct number of frames', () => {
   const testSuites = [
@@ -38,42 +39,33 @@ function runExpectedCallCountTests(testSuites) {
       const parseFrame = sinon.stub();
       parseFrame.resolves(42);
 
-      const frameResults = parseVideo(testSuite.videoParsingParameters, parseFrame);
-      await collect(frameResults);
+      const parsingResults = parseVideo(testSuite.videoParsingParameters, parseFrame);
+      await collect(parsingResults);
 
       const { videoElement, secondsBetweenFrames } = testSuite.videoParsingParameters;
       const expectedCallCount = Math.floor(videoElement.duration / secondsBetweenFrames) + 1;
+
       expect(parseFrame.callCount).to.equal(expectedCallCount);
     });
   }
-}
-
-async function collect(iterable) {
-  const result = [];
-
-  for await (const element of iterable) {
-    result.push(element);
-  }
-
-  return result;
 }
 
 describe('parseVideo should return an error if invalid parameters were provided', () => {
   it('should return a RangeError if secondsBetweenFrames is not greater than 0', async () => {
     const videoParsingParameters = {
       videoElement: createVideoElement(90, 90, 'base/test/resources/videos/city.mp4'),
-      secondsBetweenFrames: -9,
+      secondsBetweenFrames: 0,
     };
-
-    const frameResults = parseVideo(videoParsingParameters, sinon.fake());
 
     let errorOccurred = false;
 
     try {
-      await frameResults.next();
+      const parsingResults = parseVideo(videoParsingParameters, sinon.fake());
+      await parsingResults.next();
     } catch (error) {
-      expect(error).to.be.an.instanceof(RangeError);
       errorOccurred = true;
+
+      expect(error).to.be.an.instanceof(RangeError);
     }
 
     expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
