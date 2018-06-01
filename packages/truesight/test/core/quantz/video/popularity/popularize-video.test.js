@@ -30,6 +30,8 @@ describe('popularizeVideo should return a stream of parsing results', () => {
       const parsingResults = popularizeVideo({
         videoElement: createVideoElement(436, 83, 'base/test/resources/videos/stars.mp4'),
         secondsBetweenFrames: 2.1,
+        numberOfColors: 5,
+        quality: 4,
       });
       await collect(parsingResults);
     } catch (error) {

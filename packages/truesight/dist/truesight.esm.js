@@ -404,14 +404,14 @@ const BLUE_CHANNEL_INDEX = 2;
 
 var loadImage = async function loadImage(imageElement) {
   return new Promise((resolve) => {
+    const onImageLoad = () => {
+      resolve();
+      imageElement.removeEventListener('load', onImageLoad);
+    };
+    imageElement.addEventListener('load', onImageLoad);
     if (imageElement.complete) {
       resolve();
-    } else {
-      const onImageLoad = () => {
-        resolve();
-        imageElement.removeEventListener('load', onImageLoad);
-      };
-      imageElement.addEventListener('load', onImageLoad);
+      imageElement.removeEventListener('load', onImageLoad);
     }
   });
 };
@@ -918,14 +918,14 @@ class AsyncQueue {
 
 function loadVideo(videoElement) {
   return new Promise((resolve) => {
+    const onVideoLoad = () => {
+      resolve();
+      videoElement.removeEventListener('loadeddata', onVideoLoad);
+    };
+    videoElement.addEventListener('loadeddata', onVideoLoad);
     if (videoElement.readyState === 4) {
       resolve();
-    } else {
-      const onVideoLoad = () => {
-        resolve();
-        videoElement.removeEventListener('loadeddata', onVideoLoad);
-      };
-      videoElement.addEventListener('loadeddata', onVideoLoad);
+      videoElement.removeEventListener('loadeddata', onVideoLoad);
     }
   });
 }
@@ -969,7 +969,6 @@ var parseVideo = async function* parseVideo(parameters, parseFrame) {
   if (validatedParameters instanceof Error) {
     throw validatedParameters;
   }
-  await loadVideo(parameters.videoElement);
   yield* parseFrames(validatedParameters, parseFrame);
 };
 async function* parseFrames(parameters, parseFrame) {
@@ -991,6 +990,7 @@ async function* parseFrames(parameters, parseFrame) {
       videoElement.removeEventListener('seeked', parseNextFrame);
     }
   };
+  await parseNextFrame();
   videoElement.addEventListener('seeked', parseNextFrame);
   yield* getNextParsingResult(parsingResults);
 }

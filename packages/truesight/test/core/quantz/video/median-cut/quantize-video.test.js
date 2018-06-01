@@ -49,6 +49,7 @@ describe('median cut should return a stream of parsing results', () => {
     try {
       const parsingResults = quantizeVideo({
         videoElement: createVideoElement(31, 120, 'base/test/resources/videos/city.mp4'),
+        quality: 3,
       });
       await collect(parsingResults);
     } catch (error) {

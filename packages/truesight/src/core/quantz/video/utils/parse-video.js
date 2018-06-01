@@ -22,8 +22,6 @@ export default async function* parseVideo<T>(
     throw validatedParameters;
   }
 
-  await loadVideo(parameters.videoElement);
-
   yield* parseFrames(validatedParameters, parseFrame);
 }
 
@@ -55,6 +53,8 @@ async function* parseFrames<T>(
       videoElement.removeEventListener('seeked', parseNextFrame);
     }
   };
+
+  await parseNextFrame();
 
   videoElement.addEventListener('seeked', parseNextFrame);
 
