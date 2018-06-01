@@ -26,6 +26,13 @@ describe('parseVideo should parse the correct number of frames', () => {
         secondsBetweenFrames: 2.4,
       },
     },
+    {
+      name: 'should only parse the first frame if secondsBetweenFrames is greater than the video length',
+      videoParsingParameters: {
+        videoElement: createVideoElement(568, 502, 'base/test/resources/videos/stars.mp4'),
+        secondsBetweenFrames: 6.1,
+      },
+    },
   ];
 
   runExpectedCallCountTests(testSuites);
@@ -39,8 +46,8 @@ function runExpectedCallCountTests(testSuites) {
       const parseFrame = sinon.stub();
       parseFrame.resolves(42);
 
-      const parsingResults = parseVideo(testSuite.videoParsingParameters, parseFrame);
-      await collect(parsingResults);
+      const parsingResultStream = parseVideo(testSuite.videoParsingParameters, parseFrame);
+      await collect(parsingResultStream);
 
       const { videoElement, secondsBetweenFrames } = testSuite.videoParsingParameters;
       const expectedCallCount = Math.floor(videoElement.duration / secondsBetweenFrames) + 1;
@@ -49,6 +56,56 @@ function runExpectedCallCountTests(testSuites) {
     });
   }
 }
+
+describe('parseVideo should return a stream of parsing results', () => {
+  it('should return a stream of parsing results', async function runTest() {
+    this.timeout(10000);
+
+    const videoParsingParameters = {
+      videoElement: createVideoElement(54, 70, 'base/test/resources/videos/stars.mp4'),
+      secondsBetweenFrames: 1.64,
+    };
+
+    const parseFrame = sinon.stub();
+    parseFrame.onCall(0).resolves(42);
+    parseFrame.onCall(1).resolves(14);
+    parseFrame.onCall(2).resolves(17);
+    parseFrame.onCall(3).resolves(956);
+
+    const parsingResultStream = parseVideo(videoParsingParameters, parseFrame);
+    const parsingResults = await collect(parsingResultStream);
+
+    expect(parsingResults).to.deep.equal([
+      { index: 1, timestamp: 0, result: 42 },
+      { index: 2, timestamp: 1.64, result: 14 },
+      { index: 3, timestamp: 3.28, result: 17 },
+      { index: 4, timestamp: 4.92, result: 956 },
+    ]);
+  });
+
+  it('should close the stream when an error is thrown', async function runTest() {
+    this.timeout(10000);
+
+    const videoParsingParameters = {
+      videoElement: createVideoElement(54, 70, 'base/test/resources/videos/city.mp4'),
+      secondsBetweenFrames: 3.9,
+    };
+
+    const parseFrame = sinon.stub();
+    parseFrame.onCall(0).resolves(3);
+    parseFrame.onCall(1).resolves(-73);
+    parseFrame.onCall(2).rejects();
+    parseFrame.onCall(3).resolves(24);
+
+    const parsingResultStream = parseVideo(videoParsingParameters, parseFrame);
+    const parsingResults = await collect(parsingResultStream);
+
+    expect(parsingResults).to.deep.equal([
+      { index: 1, timestamp: 0, result: 3 },
+      { index: 2, timestamp: 3.9, result: -73 },
+    ]);
+  });
+});
 
 describe('parseVideo should return an error if invalid parameters were provided', () => {
   it('should return a RangeError if secondsBetweenFrames is not greater than 0', async () => {
@@ -60,8 +117,8 @@ describe('parseVideo should return an error if invalid parameters were provided'
     let errorOccurred = false;
 
     try {
-      const parsingResults = parseVideo(videoParsingParameters, sinon.fake());
-      await parsingResults.next();
+      const parsingResultStream = parseVideo(videoParsingParameters, sinon.fake());
+      await parsingResultStream.next();
     } catch (error) {
       errorOccurred = true;
 

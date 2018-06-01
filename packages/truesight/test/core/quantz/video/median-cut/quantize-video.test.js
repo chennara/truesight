@@ -8,10 +8,10 @@ describe('median cut should return an error if invalid video quantization parame
     let errorOccurred = false;
 
     try {
-      const parsingResults = quantizeVideo({
+      const parsingResultStream = quantizeVideo({
         videoElement: createVideoElement(0, 120, 'base/test/resources/videos/city.mp4'),
       });
-      await parsingResults.next();
+      await parsingResultStream.next();
     } catch (error) {
       errorOccurred = true;
 
@@ -25,11 +25,11 @@ describe('median cut should return an error if invalid video quantization parame
     let errorOccurred = false;
 
     try {
-      const parsingResults = reduceVideo({
+      const parsingResultStream = reduceVideo({
         videoElement: createVideoElement(40, 30, 'base/test/resources/videos/stars.mp4'),
         secondsBetweenFrames: 'four',
       });
-      await parsingResults.next();
+      await parsingResultStream.next();
     } catch (error) {
       errorOccurred = true;
 
@@ -47,11 +47,11 @@ describe('median cut should return a stream of parsing results', () => {
     let errorOccurred = false;
 
     try {
-      const parsingResults = quantizeVideo({
+      const parsingResultStream = quantizeVideo({
         videoElement: createVideoElement(31, 120, 'base/test/resources/videos/city.mp4'),
         quality: 3,
       });
-      await collect(parsingResults);
+      await collect(parsingResultStream);
     } catch (error) {
       errorOccurred = true;
     }
@@ -65,11 +65,11 @@ describe('median cut should return a stream of parsing results', () => {
     let errorOccurred = false;
 
     try {
-      const parsingResults = reduceVideo({
+      const parsingResultStream = reduceVideo({
         videoElement: createVideoElement(40, 30, 'base/test/resources/videos/stars.mp4'),
         secondsBetweenFrames: 4,
       });
-      await collect(parsingResults);
+      await collect(parsingResultStream);
     } catch (error) {
       errorOccurred = true;
     }

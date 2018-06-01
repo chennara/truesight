@@ -2,7 +2,7 @@
 import { AsyncQueue } from 'utils/collections/async-queue';
 import loadVideo from 'core/video/load-video';
 
-import type { VideoParsingParameters, ValidatedVideoParsingParameters } from '../types';
+import type { VideoParsingParameters, ValidatedVideoParsingParameters, ParsingResult } from '../types';
 
 import validateParameters from './validate-parameters';
 
@@ -10,12 +10,12 @@ import validateParameters from './validate-parameters';
 export type ParseFrame<T> = (HTMLCanvasElement) => Promise<T>;
 
 // An asynchronous generator object yielding parsing results for a given stream of video frames.
-export type AsyncFrameResultGenerator<T> = AsyncGenerator<T, void, void>;
+export type AsyncParsingResultGenerator<T> = AsyncGenerator<ParsingResult<T>, void, void>;
 
 export default async function* parseVideo<T>(
   parameters: VideoParsingParameters,
   parseFrame: ParseFrame<T>
-): AsyncFrameResultGenerator<T> {
+): AsyncParsingResultGenerator<T> {
   const validatedParameters = validateParameters(parameters);
 
   if (validatedParameters instanceof Error) {
@@ -28,7 +28,7 @@ export default async function* parseVideo<T>(
 async function* parseFrames<T>(
   parameters: ValidatedVideoParsingParameters,
   parseFrame: ParseFrame<T>
-): AsyncFrameResultGenerator<T> {
+): AsyncParsingResultGenerator<T> {
   const parsingResults = new AsyncQueue();
 
   const videoElement = parameters.videoElement.cloneNode();
@@ -37,18 +37,31 @@ async function* parseFrames<T>(
   await loadVideo(videoElement);
 
   let currentTime = 0;
+  let index = 1;
+
   videoElement.currentTime = currentTime;
 
   const parseNextFrame = async () => {
-    const canvasElement = drawFrameToCanvas(videoElement);
-    const parsingResult = await parseFrame(canvasElement);
-    parsingResults.enqueue(parsingResult);
+    try {
+      const canvasElement = drawFrameToCanvas(videoElement);
+      const parsingResult = await parseFrame(canvasElement);
 
-    currentTime += parameters.secondsBetweenFrames;
+      parsingResults.enqueue({
+        index,
+        timestamp: currentTime,
+        result: parsingResult,
+      });
 
-    if (currentTime <= videoElement.duration) {
-      videoElement.currentTime = currentTime;
-    } else {
+      currentTime += parameters.secondsBetweenFrames;
+      index += 1;
+
+      if (currentTime <= videoElement.duration) {
+        videoElement.currentTime = currentTime;
+      } else {
+        parsingResults.close();
+        videoElement.removeEventListener('seeked', parseNextFrame);
+      }
+    } catch (error) {
       parsingResults.close();
       videoElement.removeEventListener('seeked', parseNextFrame);
     }
@@ -72,7 +85,7 @@ function drawFrameToCanvas(videoElement: HTMLVideoElement): HTMLCanvasElement {
   return canvasElement;
 }
 
-async function* getNextParsingResult<T>(parsingResults: AsyncQueue<T>): AsyncFrameResultGenerator<T> {
+async function* getNextParsingResult<T>(parsingResults: AsyncQueue<ParsingResult<T>>): AsyncParsingResultGenerator<T> {
   const parsingResult = await parsingResults.next();
 
   if (!parsingResult.done) {

@@ -4,14 +4,14 @@ import type { ColorPalette } from 'core/quantz/image/popularity/popularize-image
 import popularizeImage from 'core/quantz/image/popularity/popularize-image';
 
 import type { VideoParsingParameters } from '../types';
-import type { AsyncFrameResultGenerator } from '../utils/parse-video';
+import type { AsyncParsingResultGenerator } from '../utils/parse-video';
 import parseVideo from '../utils/parse-video';
 
 import type { PopularityVideoParameters, PopularityBaseParameters } from './types';
 
 export default function popularizeVideo(
   parameters: PopularityVideoParameters
-): AsyncFrameResultGenerator<ColorPalette> {
+): AsyncParsingResultGenerator<ColorPalette> {
   const [videoParsingParameters, medianCutBaseParameters] = extractParameters(parameters);
 
   const popularizeImageWrapper = (canvasElement) =>

@@ -1,6 +1,6 @@
 // @flow
 
-// Defines an interval of numbers in [begin, end].
+// An interval of numbers in [begin, end].
 export class Interval {
   begin: number;
   end: number;

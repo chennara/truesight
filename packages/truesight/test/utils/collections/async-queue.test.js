@@ -26,8 +26,8 @@ describe('AsyncQueue should implement an asynchronous task queue', () => {
     tasks.enqueue(7);
 
     return result.then((yieldedTasks) => {
-      const yieldedResult = yieldedTasks.map((task) => task.value);
-      expect(yieldedResult).to.deep.equal([2, 7]);
+      const yieldedResults = yieldedTasks.map((task) => task.value);
+      expect(yieldedResults).to.deep.equal([2, 7]);
     });
   });
 

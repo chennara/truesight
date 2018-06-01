@@ -4,12 +4,12 @@ import type { InverseColorMap, ColorPalette } from 'core/quantz/image/median-cut
 import { quantizeImage, reduceImage } from 'core/quantz/image/median-cut/quantize-image';
 
 import type { VideoParsingParameters } from '../types';
-import type { AsyncFrameResultGenerator } from '../utils/parse-video';
+import type { AsyncParsingResultGenerator } from '../utils/parse-video';
 import parseVideo from '../utils/parse-video';
 
 import type { MedianCutVideoParameters, MedianCutBaseParameters } from './types';
 
-export function quantizeVideo(parameters: MedianCutVideoParameters): AsyncFrameResultGenerator<InverseColorMap> {
+export function quantizeVideo(parameters: MedianCutVideoParameters): AsyncParsingResultGenerator<InverseColorMap> {
   const [videoParsingParameters, medianCutBaseParameters] = extractParameters(parameters);
 
   const quantizeImageWrapper = (canvasElement) =>
@@ -21,7 +21,7 @@ export function quantizeVideo(parameters: MedianCutVideoParameters): AsyncFrameR
   return parseVideo(videoParsingParameters, quantizeImageWrapper);
 }
 
-export function reduceVideo(parameters: MedianCutVideoParameters): AsyncFrameResultGenerator<ColorPalette> {
+export function reduceVideo(parameters: MedianCutVideoParameters): AsyncParsingResultGenerator<ColorPalette> {
   const [videoParsingParameters, medianCutBaseParameters] = extractParameters(parameters);
 
   const reduceImageWrapper = (canvasElement) =>

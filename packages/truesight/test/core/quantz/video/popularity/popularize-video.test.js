@@ -8,8 +8,8 @@ describe('popularizeVideo should return an error if invalid video quantization p
     let errorOccurred = false;
 
     try {
-      const parsingResults = popularizeVideo({});
-      await parsingResults.next();
+      const parsingResultStream = popularizeVideo({});
+      await parsingResultStream.next();
     } catch (error) {
       errorOccurred = true;
 
@@ -27,13 +27,13 @@ describe('popularizeVideo should return a stream of parsing results', () => {
     let errorOccurred = false;
 
     try {
-      const parsingResults = popularizeVideo({
+      const parsingResultStream = popularizeVideo({
         videoElement: createVideoElement(436, 83, 'base/test/resources/videos/stars.mp4'),
         secondsBetweenFrames: 2.1,
         numberOfColors: 5,
         quality: 4,
       });
-      await collect(parsingResults);
+      await collect(parsingResultStream);
     } catch (error) {
       errorOccurred = true;
     }
