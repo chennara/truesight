@@ -991,23 +991,23 @@
     let index = 1;
     videoElement.currentTime = currentTime;
     const parseNextFrame = async () => {
+      const canvasElement = drawFrameToCanvas(videoElement);
+      let parsingResult;
       try {
-        const canvasElement = drawFrameToCanvas(videoElement);
-        const parsingResult = await parseFrame(canvasElement);
-        parsingResults.enqueue({
-          index,
-          timestamp: currentTime,
-          result: parsingResult,
-        });
-        currentTime += parameters.secondsBetweenFrames;
-        index += 1;
-        if (currentTime <= videoElement.duration) {
-          videoElement.currentTime = currentTime;
-        } else {
-          parsingResults.close();
-          videoElement.removeEventListener('seeked', parseNextFrame);
-        }
+        parsingResult = await parseFrame(canvasElement);
       } catch (error) {
+        parsingResult = error;
+      }
+      parsingResults.enqueue({
+        index,
+        timestamp: currentTime,
+        result: parsingResult,
+      });
+      currentTime += parameters.secondsBetweenFrames;
+      index += 1;
+      if (currentTime <= videoElement.duration) {
+        videoElement.currentTime = currentTime;
+      } else {
         parsingResults.close();
         videoElement.removeEventListener('seeked', parseNextFrame);
       }

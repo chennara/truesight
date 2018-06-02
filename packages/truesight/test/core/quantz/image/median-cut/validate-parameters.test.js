@@ -101,7 +101,7 @@ describe('should provide the correct default values for the median cut algorithm
       rgbImage,
     });
 
-    expect(validatedParameters).not.to.be.a('error');
+    expect(validatedParameters).not.to.be.an('error');
     expect(validatedParameters).to.have.property('numberOfColors', DEFAULT_NUMBER_OF_COLORS);
   });
 
@@ -110,7 +110,7 @@ describe('should provide the correct default values for the median cut algorithm
       rgbImage,
     });
 
-    expect(validatedParameters).not.to.be.a('error');
+    expect(validatedParameters).not.to.be.an('error');
     expect(validatedParameters).to.have.property('quality', DEFAULT_QUALITY);
   });
 });

@@ -83,7 +83,7 @@ describe('parseVideo should return a stream of parsing results', () => {
     ]);
   });
 
-  it('should close the stream when an error is thrown', async function runTest() {
+  it('should continue yielding parsing results when an error was yielded', async function runTest() {
     this.timeout(10000);
 
     const videoParsingParameters = {
@@ -100,10 +100,13 @@ describe('parseVideo should return a stream of parsing results', () => {
     const parsingResultStream = parseVideo(videoParsingParameters, parseFrame);
     const parsingResults = await collect(parsingResultStream);
 
-    expect(parsingResults).to.deep.equal([
+    expect(parsingResults.slice(0, 2)).to.deep.equal([
       { index: 1, timestamp: 0, result: 3 },
       { index: 2, timestamp: 3.9, result: -73 },
     ]);
+    expect(parsingResults[2]).to.include({ index: 3, timestamp: 7.8 });
+    expect(parsingResults[2].result).to.be.an('error');
+    expect(parsingResults[3]).to.deep.equal({ index: 4, timestamp: 11.7, result: 24 });
   });
 });
 
