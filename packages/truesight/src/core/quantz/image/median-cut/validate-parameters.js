@@ -1,90 +1,114 @@
 // @flow
 
-import type { Try } from 'utils/fp/neither';
 import { RGBImage } from 'core/image/rgb-image';
+import { asyncTry } from 'utils/fp/try';
+import loadImage from 'core/image/load-image';
 
 import { VALID_QUALITIES, DEFAULT_QUALITY, DEFAULT_NUMBER_OF_COLORS } from '../types';
 
 import type {
   MedianCutParameters,
-  RGBImageConfiguration,
   ImageElementConfiguration,
+  RGBImageConfiguration,
   ValidatedMedianCutParameters,
 } from './types';
 
-export default function validateParameters(parameters: MedianCutParameters): Try<ValidatedMedianCutParameters> {
-  const unknownProperties = getUnknownProperties(parameters);
+export default function validateMedianCutParameters(
+  parameters: MedianCutParameters
+): Promise<ValidatedMedianCutParameters> {
+  if (!parameters.imageElement && !parameters.rgbImage) {
+    return Promise.reject(
+      new RangeError('parameters argument should include either imageElement or rgbImage property')
+    );
+  }
+
+  if (parameters.imageElement) {
+    return validateImageElementConfiguration(parameters);
+  }
+
+  // parameters is of type RGBImageConfiguration
+  return validateRGBImageConfiguration(parameters);
+}
+
+async function validateImageElementConfiguration(
+  parameters: ImageElementConfiguration
+): Promise<ValidatedMedianCutParameters> {
+  const unknownProperties = getUnknownImageElementProperties(parameters);
 
   if (unknownProperties.length !== 0) {
-    return new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`);
+    return Promise.reject(new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`));
   }
 
-  if (!parameters.rgbImage && !parameters.imageElement) {
-    return new RangeError('parameters argument should include either rgbImage or imageElement property');
-  }
-
-  if (parameters.rgbImage) {
-    return validateRGBImageConfiguration(parameters);
-  }
-
-  // parameters is of type ImageElementConfiguration
-  return validateImageElementConfiguration(parameters);
-}
-
-function getUnknownProperties(parameters: MedianCutParameters): string[] {
-  const properties = Object.keys(parameters);
-
-  const validBaseProperties = ['numberOfColors', 'quality'];
-  const validRGBImageProperties = ['rgbImage', ...validBaseProperties];
-  const validImageElementProperties = ['imageElement', ...validBaseProperties];
-
-  const unknownRGBImageProperties = properties.filter((property) => !validRGBImageProperties.includes(property));
-
-  return unknownRGBImageProperties.length === 0
-    ? unknownRGBImageProperties
-    : properties.filter((property) => !validImageElementProperties.includes(property));
-}
-
-function validateRGBImageConfiguration(parameters: RGBImageConfiguration): Try<ValidatedMedianCutParameters> {
-  const { rgbImage } = parameters;
-
-  if (!(rgbImage instanceof RGBImage)) {
-    return new TypeError('image property should be of type RGBImage');
-  }
-
-  return validateBaseConfiguration(parameters);
-}
-
-function validateImageElementConfiguration(parameters: ImageElementConfiguration): Try<ValidatedMedianCutParameters> {
   const { imageElement } = parameters;
 
   if (!(imageElement instanceof HTMLImageElement) && !(imageElement instanceof HTMLCanvasElement)) {
-    return new TypeError('imageElement property should be of type HTMLImageElement or HTMLCanvasElement');
+    return Promise.reject(
+      new TypeError('imageElement property should be of type HTMLImageElement or HTMLCanvasElement')
+    );
+  }
+
+  if (imageElement instanceof HTMLImageElement) {
+    return asyncTry(async () => {
+      await loadImage(imageElement);
+
+      return validateBaseConfiguration(parameters);
+    });
   }
 
   return validateBaseConfiguration(parameters);
 }
 
-function validateBaseConfiguration(parameters: MedianCutParameters): Try<ValidatedMedianCutParameters> {
+function getUnknownImageElementProperties(parameters: MedianCutParameters): string[] {
+  const properties = Object.keys(parameters);
+  const validProperties = ['imageElement', 'numberOfColors', 'quality'];
+
+  return properties.filter((property) => !validProperties.includes(property));
+}
+
+function validateRGBImageConfiguration(parameters: RGBImageConfiguration): Promise<ValidatedMedianCutParameters> {
+  const unknownProperties = getUnknownRGBImageProperties(parameters);
+
+  if (unknownProperties.length !== 0) {
+    return Promise.reject(new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`));
+  }
+
+  const { rgbImage } = parameters;
+
+  if (!(rgbImage instanceof RGBImage)) {
+    return Promise.reject(new TypeError('image property should be of type RGBImage'));
+  }
+
+  return validateBaseConfiguration(parameters);
+}
+
+function getUnknownRGBImageProperties(parameters: MedianCutParameters): string[] {
+  const properties = Object.keys(parameters);
+  const validProperties = ['rgbImage', 'numberOfColors', 'quality'];
+
+  return properties.filter((property) => !validProperties.includes(property));
+}
+
+function validateBaseConfiguration(parameters: MedianCutParameters): Promise<ValidatedMedianCutParameters> {
   const { numberOfColors = DEFAULT_NUMBER_OF_COLORS, quality = DEFAULT_QUALITY } = parameters;
 
   if (!Number.isInteger(numberOfColors)) {
-    return new TypeError('numberOfColors property should be an integer');
+    return Promise.reject(new TypeError('numberOfColors property should be an integer'));
   }
   if (!(numberOfColors >= 1 && numberOfColors <= 256)) {
-    return new RangeError('numberOfColors property should lie in [1, 256]');
+    return Promise.reject(new RangeError('numberOfColors property should lie in [1, 256]'));
   }
 
   if (!Number.isInteger(quality)) {
-    return new TypeError('quality property should be an integer');
+    return Promise.reject(new TypeError('quality property should be an integer'));
   }
   if (!VALID_QUALITIES.liesIn(quality)) {
-    return new RangeError(`quality property should lie in ${VALID_QUALITIES.toString()}`);
+    return Promise.reject(new RangeError(`quality property should lie in ${VALID_QUALITIES.toString()}`));
   }
 
-  if (parameters.rgbImage) {
-    return { rgbImage: parameters.rgbImage, numberOfColors, quality };
+  if (parameters.imageElement) {
+    return Promise.resolve({ imageElement: parameters.imageElement, numberOfColors, quality });
   }
 
-  return { imageElement: parameters.imageElement, numberOfColors, quality };
+  // parameters includes rgbImage property
+  return Promise.resolve({ rgbImage: parameters.rgbImage, numberOfColors, quality });
 }

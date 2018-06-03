@@ -2,40 +2,31 @@ import { RGBColor } from 'core/color/rgb-color';
 import popularizeImage from 'core/quantz/image/popularity/popularize-image';
 import loadImage from 'core/image/load-image';
 
-import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image';
-import drawImageToCanvasTestUtil from '../test-utils/draw-image-to-canvas';
-import checkIfSimilarColors from '../test-utils/check-if-similar-colors';
+import createRandomizedRGBImage from 'test-utils/image/create-randomized-rgb-image';
+import drawImageToCanvasTestUtil from 'test-utils/image/draw-image-to-canvas';
+import checkIfSimilarColors from 'test-utils/color/check-if-similar-colors';
+import errorify from 'test-utils/errorify';
 
 describe('popularizeImage should return an error if invalid parameters were provided', () => {
-  it('should return a RangeError if parameters argument does not include rgbImage nor imageElement property', async () => {
-    let errorOccurred = false;
+  it('should return a RangeError if parameters argument does not include rgbImage nor imageElement property', () => {
+    const result = errorify(popularizeImage({}));
 
-    try {
-      await popularizeImage({});
-    } catch (error) {
-      errorOccurred = true;
-
+    return result.catch((error) => {
       expect(error).to.be.an.instanceof(RangeError);
-    }
-
-    expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
+    });
   });
 
-  it('should return a TypeError if regionSize property is not of type [number, number, number]', async () => {
-    let errorOccurred = false;
-
-    try {
-      await popularizeImage({
+  it('should return a TypeError if regionSize property is not of type [number, number, number]', () => {
+    const result = errorify(
+      popularizeImage({
         imageElement: new Image(),
         regionSize: [10, 20],
-      });
-    } catch (error) {
-      errorOccurred = true;
+      })
+    );
 
+    return result.catch((error) => {
       expect(error).to.be.an.instanceof(TypeError);
-    }
-
-    expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
+    });
   });
 });
 

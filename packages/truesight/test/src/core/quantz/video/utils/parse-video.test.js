@@ -1,7 +1,8 @@
 import parseVideo from 'core/quantz/video/utils/parse-video';
 
-import createVideoElement from '../test-utils/create-video-element';
-import collect from '../test-utils/async-collect';
+import createVideoElement from 'test-utils/video/create-video-element';
+import errorify from 'test-utils/errorify';
+import asyncCollect from 'test-utils/async-collect';
 
 describe('parseVideo should parse the correct number of frames', () => {
   const testSuites = [
@@ -47,7 +48,8 @@ function runExpectedCallCountTests(testSuites) {
       parseFrame.resolves(42);
 
       const parsingResultStream = parseVideo(testSuite.videoParsingParameters, parseFrame);
-      await collect(parsingResultStream);
+
+      await asyncCollect(parsingResultStream);
 
       const { videoElement, secondsBetweenFrames } = testSuite.videoParsingParameters;
       const expectedCallCount = Math.floor(videoElement.duration / secondsBetweenFrames) + 1;
@@ -73,7 +75,8 @@ describe('parseVideo should return a stream of parsing results', () => {
     parseFrame.onCall(3).resolves(956);
 
     const parsingResultStream = parseVideo(videoParsingParameters, parseFrame);
-    const parsingResults = await collect(parsingResultStream);
+
+    const parsingResults = await asyncCollect(parsingResultStream);
 
     expect(parsingResults).to.deep.equal([
       { index: 1, timestamp: 0, result: 42 },
@@ -98,7 +101,8 @@ describe('parseVideo should return a stream of parsing results', () => {
     parseFrame.onCall(3).resolves(24);
 
     const parsingResultStream = parseVideo(videoParsingParameters, parseFrame);
-    const parsingResults = await collect(parsingResultStream);
+
+    const parsingResults = await asyncCollect(parsingResultStream);
 
     expect(parsingResults.slice(0, 2)).to.deep.equal([
       { index: 1, timestamp: 0, result: 3 },
@@ -111,23 +115,17 @@ describe('parseVideo should return a stream of parsing results', () => {
 });
 
 describe('parseVideo should return an error if invalid parameters were provided', () => {
-  it('should return a RangeError if secondsBetweenFrames is not greater than 0', async () => {
+  it('should return a RangeError if secondsBetweenFrames is not greater than 0', () => {
     const videoParsingParameters = {
       videoElement: createVideoElement(90, 90, 'base/test/resources/videos/city.mp4'),
       secondsBetweenFrames: 0,
     };
+    const parsingResultStream = parseVideo(videoParsingParameters, sinon.fake());
 
-    let errorOccurred = false;
+    const result = errorify(parsingResultStream.next());
 
-    try {
-      const parsingResultStream = parseVideo(videoParsingParameters, sinon.fake());
-      await parsingResultStream.next();
-    } catch (error) {
-      errorOccurred = true;
-
+    return result.catch((error) => {
       expect(error).to.be.an.instanceof(RangeError);
-    }
-
-    expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
+    });
   });
 });

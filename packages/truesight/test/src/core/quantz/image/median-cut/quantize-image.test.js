@@ -2,42 +2,38 @@ import { RGBColor } from 'core/color/rgb-color';
 import { quantizeImage, reduceImage } from 'core/quantz/image/median-cut/quantize-image';
 import loadImage from 'core/image/load-image';
 
-import createRandomizedRGBImage from '../test-utils/create-randomized-rgb-image';
-import drawImageToCanvasTestUtil from '../test-utils/draw-image-to-canvas';
-import checkIfSimilarColors from '../test-utils/check-if-similar-colors';
+import createRandomizedRGBImage from 'test-utils/image/create-randomized-rgb-image';
+import drawImageToCanvasTestUtil from 'test-utils/image/draw-image-to-canvas';
+import checkIfSimilarColors from 'test-utils/color/check-if-similar-colors';
+import errorify from 'test-utils/errorify';
 
 describe('median cut should return an error if invalid image quantization parameters were provided', () => {
-  it('should return a TypeError if image property is not of type RGBImage', async () => {
-    let errorOccurred = false;
-
-    try {
-      await quantizeImage({
+  it('should return a TypeError if image property is not of type RGBImage', () => {
+    const result = errorify(
+      reduceImage({
         rgbImage: [],
-      });
-    } catch (error) {
-      errorOccurred = true;
+      })
+    );
 
+    return result.catch((error) => {
       expect(error).to.be.an.instanceof(TypeError);
-    }
-
-    expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
+    });
   });
 
-  it('should return a RangeError if numberOfColors property does not lie in [1, 256]', async () => {
-    let errorOccurred = false;
+  it('should return a RangeError if numberOfColors property does not lie in [1, 256]', () => {
+    const imageElement = new Image();
+    imageElement.src = 'base/test/resources/images/baby-driver_2017.jpg';
 
-    try {
-      await reduceImage({
-        imageElement: new Image(),
-        numberOfColors: -2,
-      });
-    } catch (error) {
-      errorOccurred = true;
+    const result = errorify(
+      reduceImage({
+        imageElement,
+        numberOfColors: -792,
+      })
+    );
 
+    return result.catch((error) => {
       expect(error).to.be.an.instanceof(RangeError);
-    }
-
-    expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
+    });
   });
 });
 

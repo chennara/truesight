@@ -14,22 +14,6 @@ export class HSLuvImage {
     this.data = data;
   }
 
-  static fromRGBImage(rgbImage: RGBImage, quality: number): HSLuvImage {
-    const hsluvImageData = [];
-
-    const numberOfPixelsToSkip = quality - 1;
-
-    for (let i = numberOfPixelsToSkip; i < rgbImage.data.length; i += 1 + numberOfPixelsToSkip) {
-      const rgbChannels = [rgbImage.data[i].red, rgbImage.data[i].green, rgbImage.data[i].blue];
-      const rgbColor = new RGBColor(rgbChannels);
-      const hsluvColor = rgbColor.toHSLuvColor();
-
-      hsluvImageData.push(hsluvColor);
-    }
-
-    return new HSLuvImage(hsluvImageData);
-  }
-
   static async fromImageElement(imageElement: ImageElement, quality: number): Promise<HSLuvImage> {
     const hsluvImageData = [];
 
@@ -42,6 +26,22 @@ export class HSLuvImage {
         rgbaImageData[i + GREEN_CHANNEL_INDEX],
         rgbaImageData[i + BLUE_CHANNEL_INDEX],
       ];
+      const rgbColor = new RGBColor(rgbChannels);
+      const hsluvColor = rgbColor.toHSLuvColor();
+
+      hsluvImageData.push(hsluvColor);
+    }
+
+    return new HSLuvImage(hsluvImageData);
+  }
+
+  static fromRGBImage(rgbImage: RGBImage, quality: number): HSLuvImage {
+    const hsluvImageData = [];
+
+    const numberOfPixelsToSkip = quality - 1;
+
+    for (let i = numberOfPixelsToSkip; i < rgbImage.data.length; i += 1 + numberOfPixelsToSkip) {
+      const rgbChannels = [rgbImage.data[i].red, rgbImage.data[i].green, rgbImage.data[i].blue];
       const rgbColor = new RGBColor(rgbChannels);
       const hsluvColor = rgbColor.toHSLuvColor();
 

@@ -41,7 +41,7 @@ module.exports = (config) => {
           include: nodeModulesGlob,
         }),
         includePaths({
-          paths: [path.join(root, 'src')],
+          paths: [path.join(root, 'src'), path.join(root, 'test')],
           extensions: ['.js'],
         }),
         babel({

@@ -2,9 +2,10 @@
 
 import { RGBImage } from 'core/image/rgb-image';
 import { RGBColor, RED_CHANNEL_INDEX, GREEN_CHANNEL_INDEX, BLUE_CHANNEL_INDEX } from 'core/color/rgb-color';
+import { asyncTry } from 'utils/fp/try';
 
 import type { MedianCutParameters, ValidatedMedianCutParameters } from './types';
-import validateParameters from './validate-parameters';
+import validateMedianCutParameters from './validate-parameters';
 
 // Maps each color in the image to its representative color.
 export type InverseColorMap = {|
@@ -33,17 +34,14 @@ export function reduceImage(parameters: MedianCutParameters): Promise<ColorPalet
 }
 
 async function runMedianCut<T>(parameters: MedianCutParameters, buildColorMap: (Vbox[]) => T): Promise<T> {
-  const validatedParameters = validateParameters(parameters);
+  return asyncTry(async () => {
+    const validatedParameters = await validateMedianCutParameters(parameters);
+    const rgbImage = await extractRGBImage(validatedParameters);
+    const vboxes = findMostDominantColors(rgbImage, validatedParameters.numberOfColors);
+    const colorMap = buildColorMap(vboxes);
 
-  if (validatedParameters instanceof Error) {
-    return Promise.reject(validatedParameters);
-  }
-
-  const rgbImage = await extractRGBImage(validatedParameters);
-  const vboxes = findMostDominantColors(rgbImage, validatedParameters.numberOfColors);
-  const colorMap = buildColorMap(vboxes);
-
-  return colorMap;
+    return colorMap;
+  });
 }
 
 async function extractRGBImage(parameters: ValidatedMedianCutParameters): Promise<RGBImage> {

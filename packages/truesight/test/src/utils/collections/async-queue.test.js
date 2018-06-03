@@ -1,5 +1,7 @@
 import { AsyncQueue } from 'utils/collections/async-queue';
 
+import errorify from 'test-utils/errorify';
+
 describe('AsyncQueue should implement an asynchronous task queue', () => {
   it('should collect the yielded values', async () => {
     const tasks = new AsyncQueue();
@@ -31,33 +33,25 @@ describe('AsyncQueue should implement an asynchronous task queue', () => {
     });
   });
 
-  it('should receive an error when enqueueing an Error object', async () => {
+  it('should receive an error when enqueueing an Error object', () => {
     const tasks = new AsyncQueue();
 
     tasks.enqueue(new Error('train caught fire'));
 
-    let errorOccurred = false;
+    const result = errorify(tasks.next());
 
-    try {
-      await tasks.next();
-    } catch (error) {
-      errorOccurred = true;
-
-      expect(error).to.be.a('error');
+    return result.catch((error) => {
       expect(error.message).to.equal('train caught fire');
-    }
-
-    expect(errorOccurred).to.be.true; // eslint-disable-line no-unused-expressions
+    });
   });
 
   it('should receive an error when awaiting an Error object', () => {
     const tasks = new AsyncQueue();
 
-    const result = Promise.resolve(tasks.next());
+    const result = errorify(Promise.resolve(tasks.next()));
     tasks.enqueue(new Error('she bit the apple'));
 
     return result.catch((yieldedTask) => {
-      expect(yieldedTask).to.be.a('error');
       expect(yieldedTask.message).to.equal('she bit the apple');
     });
   });
@@ -76,7 +70,6 @@ describe('AsyncQueue should implement an asynchronous task queue', () => {
     } catch (error) {
       errorOccurred = true;
 
-      expect(error).to.be.a('error');
       expect(error.message).to.equal('unable to enqueue a task onto a closed queue');
     }
 

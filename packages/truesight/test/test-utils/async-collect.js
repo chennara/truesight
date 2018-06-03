@@ -1,4 +1,4 @@
-export default async function collect(iterable) {
+export default async function asyncCollect(iterable) {
   const result = [];
 
   for await (const element of iterable) {

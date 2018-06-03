@@ -16,13 +16,13 @@ export default async function* parseVideo<T>(
   parameters: VideoParsingParameters,
   parseFrame: ParseFrame<T>
 ): AsyncParsingResultGenerator<T> {
-  const validatedParameters = validateParameters(parameters);
+  try {
+    const validatedParameters = await validateParameters(parameters);
 
-  if (validatedParameters instanceof Error) {
-    throw validatedParameters;
+    yield* parseFrames(validatedParameters, parseFrame);
+  } catch (error) {
+    throw error;
   }
-
-  yield* parseFrames(validatedParameters, parseFrame);
 }
 
 async function* parseFrames<T>(
@@ -33,8 +33,12 @@ async function* parseFrames<T>(
 
   const videoElement = parameters.videoElement.cloneNode();
 
-  videoElement.preload = 'auto';
-  await loadVideo(videoElement);
+  try {
+    videoElement.preload = 'auto';
+    await loadVideo(videoElement);
+  } catch (error) {
+    throw error;
+  }
 
   let currentTime = 0;
   let index = 1;

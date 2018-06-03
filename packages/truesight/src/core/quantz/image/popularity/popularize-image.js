@@ -3,9 +3,10 @@
 import { HSLuvImage } from 'core/image/hsluv-image';
 import { HSLuvColor } from 'core/color/hsluv-color';
 import { RGBColor } from 'core/color/rgb-color';
+import { asyncTry } from 'utils/fp/try';
 
 import type { PopularityParameters, ValidatedPopularityParameters, RegionSize } from './types';
-import validateParameters from './validate-parameters';
+import validatePopularityParameters from './validate-parameters';
 import mapColorToRegionID from './map-color-to-region-id';
 
 // A histogram of the most dominant colors in an image.
@@ -24,20 +25,17 @@ type ImageHistogram = [string, RegionHistogram][];
 type RegionHistogram = [string, number][];
 
 export default async function popularizeImage(parameters: PopularityParameters): Promise<ColorPalette> {
-  const validatedParameters = validateParameters(parameters);
+  return asyncTry(async () => {
+    const validatedParameters = await validatePopularityParameters(parameters);
+    const hsluvImage = await extractHSLuvImage(validatedParameters);
+    const colorPalette = buildColorPalette(
+      hsluvImage,
+      validatedParameters.regionSize,
+      validatedParameters.numberOfColors
+    );
 
-  if (validatedParameters instanceof Error) {
-    return Promise.reject(validatedParameters);
-  }
-
-  const hsluvImage = await extractHSLuvImage(validatedParameters);
-  const colorPalette = buildColorPalette(
-    hsluvImage,
-    validatedParameters.regionSize,
-    validatedParameters.numberOfColors
-  );
-
-  return colorPalette;
+    return colorPalette;
+  });
 }
 
 async function extractHSLuvImage(parameters: ValidatedPopularityParameters): Promise<HSLuvImage> {
