@@ -3,6 +3,7 @@
 import { HSLuvImage } from 'core/image/hsluv-image';
 import { HSLuvColor } from 'core/color/hsluv-color';
 import { RGBColor } from 'core/color/rgb-color';
+import { hsluvToRgbColor } from 'core/color/conversion';
 import { asyncTry } from 'utils/fp/try';
 
 import type { PopularityParameters, ValidatedPopularityParameters, RegionSize } from './types';
@@ -106,7 +107,7 @@ function findMostDominantColor(histogram: RegionHistogram): ColorToPopulationMap
     .reduce((previous, current) => (current.population > previous.population ? current : previous));
 
   return {
-    color: mostDominantColorEntry.color.toRGBColor(),
+    color: hsluvToRgbColor(mostDominantColorEntry.color),
     population: getRegionPopulation(histogram),
   };
 }

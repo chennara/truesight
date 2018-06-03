@@ -3,6 +3,332 @@
  * Copyright (c) 2018-present, Chennara Nhes.
  * Released under the MIT License.
  */
+class RGBColor {
+  constructor(channels) {
+    this.channels = channels;
+  }
+  get red() {
+    return this.channels[RED_CHANNEL_INDEX];
+  }
+  get green() {
+    return this.channels[GREEN_CHANNEL_INDEX];
+  }
+  get blue() {
+    return this.channels[BLUE_CHANNEL_INDEX];
+  }
+}
+const RED_CHANNEL_INDEX = 0;
+const GREEN_CHANNEL_INDEX = 1;
+const BLUE_CHANNEL_INDEX = 2;
+
+async function asyncTry(fn) {
+  try {
+    return await fn();
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+var loadImage = async function loadImage(imageElement, delay = 2000) {
+  const loadImagePromise = new Promise((resolve) => {
+    const onImageLoad = () => {
+      imageElement.removeEventListener('load', onImageLoad);
+      resolve();
+    };
+    imageElement.addEventListener('load', onImageLoad);
+    if (imageElement.complete && imageElement.naturalWidth !== 0) {
+      imageElement.removeEventListener('load', onImageLoad);
+      resolve();
+    }
+  });
+  const timeoutPromise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(new RangeError(`failed to load the image, timeout of ${delay} ms exceeded`));
+    }, delay);
+  });
+  return Promise.race([loadImagePromise, timeoutPromise]);
+};
+
+var getImageData = async function getImageData(imageElement) {
+  if (imageElement instanceof HTMLImageElement) {
+    return getImageDataFromHTMLImageElement(imageElement);
+  }
+  return getImageDataFromHTMLCanvasElement(imageElement);
+};
+async function getImageDataFromHTMLImageElement(imageElement) {
+  return asyncTry(async () => {
+    await loadImage(imageElement);
+    const canvasElement = drawImageToCanvas(imageElement);
+    const imageData = getImageDataFromHTMLCanvasElement(canvasElement);
+    return imageData;
+  });
+}
+function drawImageToCanvas(imageElement) {
+  const canvasElement = document.createElement('canvas');
+  canvasElement.width = imageElement.width;
+  canvasElement.height = imageElement.height;
+  const canvasContext = canvasElement.getContext('2d');
+  canvasContext.drawImage(imageElement, 0, 0, imageElement.width, imageElement.height);
+  return canvasElement;
+}
+function getImageDataFromHTMLCanvasElement(canvasElement) {
+  const canvasContext = canvasElement.getContext('2d');
+  const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height).data;
+  return imageData;
+}
+
+class RGBImage {
+  constructor(data) {
+    this.data = data;
+  }
+  static async fromImageElement(imageElement, quality) {
+    const rgbImageData = [];
+    const rgbaImageData = await getImageData(imageElement);
+    const numberOfEntriesToSkip = 4 * (quality - 1);
+    for (let i = numberOfEntriesToSkip; i < rgbaImageData.length; i += 4 + numberOfEntriesToSkip) {
+      const rgbColor = new RGBColor([
+        rgbaImageData[i + RED_CHANNEL_INDEX],
+        rgbaImageData[i + GREEN_CHANNEL_INDEX],
+        rgbaImageData[i + BLUE_CHANNEL_INDEX],
+      ]);
+      rgbImageData.push(rgbColor);
+    }
+    return new RGBImage(rgbImageData);
+  }
+}
+
+class Interval {
+  constructor(begin, end) {
+    this.begin = begin;
+    this.end = end;
+  }
+  liesIn(value) {
+    return value >= this.begin && value <= this.end;
+  }
+  toString() {
+    return `[${this.begin}, ${this.end}]`;
+  }
+}
+
+const HIGHEST_QUALITY = 1;
+const LOWEST_QUALITY = 25;
+const VALID_QUALITIES = new Interval(HIGHEST_QUALITY, LOWEST_QUALITY);
+const DEFAULT_NUMBER_OF_COLORS = 8;
+const DEFAULT_QUALITY = HIGHEST_QUALITY;
+
+function validateMedianCutParameters(parameters) {
+  if (!parameters.imageElement && !parameters.rgbImage) {
+    return Promise.reject(
+      new RangeError('parameters argument should include either imageElement or rgbImage property')
+    );
+  }
+  if (parameters.imageElement) {
+    return validateImageElementConfiguration(parameters);
+  }
+  return validateRGBImageConfiguration(parameters);
+}
+async function validateImageElementConfiguration(parameters) {
+  const unknownProperties = getUnknownImageElementProperties(parameters);
+  if (unknownProperties.length !== 0) {
+    return Promise.reject(new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`));
+  }
+  const { imageElement } = parameters;
+  if (!(imageElement instanceof HTMLImageElement) && !(imageElement instanceof HTMLCanvasElement)) {
+    return Promise.reject(
+      new TypeError('imageElement property should be of type HTMLImageElement or HTMLCanvasElement')
+    );
+  }
+  if (imageElement instanceof HTMLImageElement) {
+    return asyncTry(async () => {
+      await loadImage(imageElement);
+      return validateBaseConfiguration(parameters);
+    });
+  }
+  return validateBaseConfiguration(parameters);
+}
+function getUnknownImageElementProperties(parameters) {
+  const properties = Object.keys(parameters);
+  const validProperties = ['imageElement', 'numberOfColors', 'quality'];
+  return properties.filter((property) => !validProperties.includes(property));
+}
+function validateRGBImageConfiguration(parameters) {
+  const unknownProperties = getUnknownRGBImageProperties(parameters);
+  if (unknownProperties.length !== 0) {
+    return Promise.reject(new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`));
+  }
+  const { rgbImage } = parameters;
+  if (!(rgbImage instanceof RGBImage)) {
+    return Promise.reject(new TypeError('image property should be of type RGBImage'));
+  }
+  return validateBaseConfiguration(parameters);
+}
+function getUnknownRGBImageProperties(parameters) {
+  const properties = Object.keys(parameters);
+  const validProperties = ['rgbImage', 'numberOfColors', 'quality'];
+  return properties.filter((property) => !validProperties.includes(property));
+}
+function validateBaseConfiguration(parameters) {
+  const { numberOfColors = DEFAULT_NUMBER_OF_COLORS, quality = DEFAULT_QUALITY } = parameters;
+  if (!Number.isInteger(numberOfColors)) {
+    return Promise.reject(new TypeError('numberOfColors property should be an integer'));
+  }
+  if (!(numberOfColors >= 1 && numberOfColors <= 256)) {
+    return Promise.reject(new RangeError('numberOfColors property should lie in [1, 256]'));
+  }
+  if (!Number.isInteger(quality)) {
+    return Promise.reject(new TypeError('quality property should be an integer'));
+  }
+  if (!VALID_QUALITIES.liesIn(quality)) {
+    return Promise.reject(new RangeError(`quality property should lie in ${VALID_QUALITIES.toString()}`));
+  }
+  if (parameters.imageElement) {
+    return Promise.resolve({ imageElement: parameters.imageElement, numberOfColors, quality });
+  }
+  return Promise.resolve({ rgbImage: parameters.rgbImage, numberOfColors, quality });
+}
+
+function quantizeImage(parameters) {
+  return runMedianCut(parameters, buildInverseColorMap);
+}
+function reduceImage(parameters) {
+  return runMedianCut(parameters, buildColorPalette);
+}
+async function runMedianCut(parameters, buildColorMap) {
+  return asyncTry(async () => {
+    const validatedParameters = await validateMedianCutParameters(parameters);
+    const rgbImage = await extractRGBImage(validatedParameters);
+    const vboxes = findMostDominantColors(rgbImage, validatedParameters.numberOfColors);
+    const colorMap = buildColorMap(vboxes);
+    return colorMap;
+  });
+}
+async function extractRGBImage(parameters) {
+  return parameters.rgbImage
+    ? parameters.rgbImage
+    : RGBImage.fromImageElement(parameters.imageElement, parameters.quality);
+}
+function findMostDominantColors(image, numberOfColors) {
+  let vboxes = [image.data];
+  for (let i = 0; i < numberOfColors - 1; i += 1) {
+    const largestVbox = findLargestVbox(vboxes);
+    const longestAxis = findLongestAxis(largestVbox);
+    const splittedVboxes = splitAlongAxis(largestVbox, longestAxis);
+    vboxes.splice(vboxes.indexOf(largestVbox), 1);
+    vboxes = vboxes.concat(splittedVboxes);
+  }
+  return vboxes;
+}
+function findLargestVbox(vboxes) {
+  return vboxes.reduce((previous, current) => (current.length > previous.length ? current : previous));
+}
+function findLongestAxis(vbox) {
+  class RGBColorAxis {
+    constructor(axis) {
+      this.axis = axis;
+      this.minMax = [255, 0];
+    }
+    updateMinMax(value) {
+      this.minMax = [Math.min(value, this.minMax[0]), Math.max(value, this.minMax[1])];
+    }
+    get width() {
+      return this.minMax[1] - this.minMax[0];
+    }
+  }
+  const rgbColorAxes = [
+    new RGBColorAxis(RED_CHANNEL_INDEX),
+    new RGBColorAxis(GREEN_CHANNEL_INDEX),
+    new RGBColorAxis(BLUE_CHANNEL_INDEX),
+  ];
+  vbox.forEach((color) => {
+    rgbColorAxes[RED_CHANNEL_INDEX].updateMinMax(color.red);
+    rgbColorAxes[GREEN_CHANNEL_INDEX].updateMinMax(color.green);
+    rgbColorAxes[BLUE_CHANNEL_INDEX].updateMinMax(color.blue);
+  });
+  const longestAxis = rgbColorAxes.reduce((previous, current) => (current.width > previous.width ? current : previous));
+  return longestAxis.axis;
+}
+function splitAlongAxis(vbox, axis) {
+  const median = findAxisMedian(vbox, axis);
+  const vboxes = splitOnAxisMedian(vbox, axis, median);
+  return vboxes;
+}
+function findAxisMedian(vbox, axis) {
+  const extractedChannelValues = vbox
+    .map((color) => color.channels[axis])
+    .sort((previous, current) => previous - current);
+  const median = extractedChannelValues[Math.floor(extractedChannelValues.length / 2) - 1];
+  return median;
+}
+function splitOnAxisMedian(vbox, axis, median) {
+  const groupByAxisMedian = (color) => (color.channels[axis] <= median ? 0 : 1);
+  const vboxes = vbox.reduce(
+    (accumulator, color) => {
+      accumulator[groupByAxisMedian(color)].push(color);
+      return accumulator;
+    },
+    [[], []]
+  );
+  return vboxes;
+}
+function buildInverseColorMap(vboxes) {
+  const inverseColorMap = vboxes.map((vbox) => {
+    const representativeColor = findRepresentativeColor(vbox);
+    return vbox.map((color) => ({
+      sourceColor: color,
+      representativeColor,
+    }));
+  });
+  return [].concat(...inverseColorMap);
+}
+function buildColorPalette(vboxes) {
+  return vboxes.map((vbox) => ({
+    color: findRepresentativeColor(vbox),
+    population: vbox.length,
+  }));
+}
+function findRepresentativeColor(vbox) {
+  const colorSum = vbox.reduce(
+    (accumulator, color) => [
+      accumulator[RED_CHANNEL_INDEX] + color.red,
+      accumulator[GREEN_CHANNEL_INDEX] + color.green,
+      accumulator[BLUE_CHANNEL_INDEX] + color.blue,
+    ],
+    [0, 0, 0]
+  );
+  const colorAverage = colorSum.map((channelSum) => Math.floor(channelSum / vbox.length + 0.5));
+  return new RGBColor([
+    colorAverage[RED_CHANNEL_INDEX],
+    colorAverage[GREEN_CHANNEL_INDEX],
+    colorAverage[BLUE_CHANNEL_INDEX],
+  ]);
+}
+
+class HSLuvColor {
+  constructor(channels) {
+    this.channels = channels;
+  }
+  toString() {
+    return this.channels.toString();
+  }
+  static fromString(colorString) {
+    const channels = colorString.split(',').map(Number);
+    const color = new HSLuvColor([channels[0], channels[1], channels[2]]);
+    return color;
+  }
+  get hue() {
+    return this.channels[HUE_CHANNEL_INDEX];
+  }
+  get saturation() {
+    return this.channels[SATURATION_CHANNEL_INDEX];
+  }
+  get lightness() {
+    return this.channels[LIGHTNESS_CHANNEL_INDEX];
+  }
+}
+const HUE_CHANNEL_INDEX = 0;
+const SATURATION_CHANNEL_INDEX = 1;
+const LIGHTNESS_CHANNEL_INDEX = 2;
+
 var hsluv = hsluv || {};
 hsluv.Geometry = function() {};
 hsluv.Geometry.intersectLineLine = function(a, b) {
@@ -347,354 +673,21 @@ var root = {
 };
 var hsluv_1 = root;
 
-class HSLuvColor {
-  constructor(channels) {
-    this.channels = channels;
-  }
-  toString() {
-    return this.channels.toString();
-  }
-  toRGBColor() {
-    const rgbChannels = hsluv_1.hsluvToRgb(this.channels).map((channel) => Math.floor(channel * 255 + 0.5));
-    const rgbColor = new RGBColor(rgbChannels);
-    return rgbColor;
-  }
-  static fromString(colorString) {
-    const channels = colorString.split(',').map(Number);
-    const color = new HSLuvColor([channels[0], channels[1], channels[2]]);
-    return color;
-  }
-  get hue() {
-    return this.channels[HUE_CHANNEL_INDEX];
-  }
-  get saturation() {
-    return this.channels[SATURATION_CHANNEL_INDEX];
-  }
-  get lightness() {
-    return this.channels[LIGHTNESS_CHANNEL_INDEX];
-  }
+function rgbToHSLuvColor(color) {
+  const rgbChannels = color.channels.map((channel) => channel / 255);
+  const hsluvChannels = hsluv_1.rgbToHsluv(rgbChannels);
+  const hsluvColor = new HSLuvColor(hsluvChannels);
+  return hsluvColor;
 }
-const HUE_CHANNEL_INDEX = 0;
-const SATURATION_CHANNEL_INDEX = 1;
-const LIGHTNESS_CHANNEL_INDEX = 2;
-
-class RGBColor {
-  constructor(channels) {
-    this.channels = channels;
-  }
-  toHSLuvColor() {
-    const rgbChannels = this.channels.map((channel) => channel / 255);
-    const hsluvChannels = hsluv_1.rgbToHsluv(rgbChannels);
-    const hsluvColor = new HSLuvColor(hsluvChannels);
-    return hsluvColor;
-  }
-  get red() {
-    return this.channels[RED_CHANNEL_INDEX];
-  }
-  get green() {
-    return this.channels[GREEN_CHANNEL_INDEX];
-  }
-  get blue() {
-    return this.channels[BLUE_CHANNEL_INDEX];
-  }
-}
-const RED_CHANNEL_INDEX = 0;
-const GREEN_CHANNEL_INDEX = 1;
-const BLUE_CHANNEL_INDEX = 2;
-
-var loadImage = async function loadImage(imageElement, delay = 2000) {
-  const loadImagePromise = new Promise((resolve) => {
-    const onImageLoad = () => {
-      resolve();
-      imageElement.removeEventListener('load', onImageLoad);
-    };
-    imageElement.addEventListener('load', onImageLoad);
-    if (imageElement.complete && imageElement.naturalWidth !== 0) {
-      resolve();
-      imageElement.removeEventListener('load', onImageLoad);
-    }
-  });
-  const timeoutPromise = new Promise((resolve, reject) => {
-    setTimeout(() => {
-      reject(new RangeError(`failed to load the image, timeout of ${delay} ms exceeded`));
-    }, delay);
-  });
-  return Promise.race([loadImagePromise, timeoutPromise]);
-};
-
-var getImageData = async function getImageData(imageElement) {
-  if (imageElement instanceof HTMLImageElement) {
-    return getImageDataFromHTMLImageElement(imageElement);
-  }
-  return getImageDataFromHTMLCanvasElement(imageElement);
-};
-async function getImageDataFromHTMLImageElement(imageElement) {
-  try {
-    await loadImage(imageElement);
-  } catch (error) {
-    return Promise.reject(error);
-  }
-  const canvasElement = drawImageToCanvas(imageElement);
-  const imageData = getImageDataFromHTMLCanvasElement(canvasElement);
-  return imageData;
-}
-function drawImageToCanvas(imageElement) {
-  const canvasElement = document.createElement('canvas');
-  canvasElement.width = imageElement.width;
-  canvasElement.height = imageElement.height;
-  const canvasContext = canvasElement.getContext('2d');
-  canvasContext.drawImage(imageElement, 0, 0, imageElement.width, imageElement.height);
-  return canvasElement;
-}
-function getImageDataFromHTMLCanvasElement(canvasElement) {
-  const canvasContext = canvasElement.getContext('2d');
-  const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height).data;
-  return imageData;
-}
-
-class RGBImage {
-  constructor(data) {
-    this.data = data;
-  }
-  static async fromImageElement(imageElement, quality) {
-    const rgbImageData = [];
-    const rgbaImageData = await getImageData(imageElement);
-    const numberOfEntriesToSkip = 4 * (quality - 1);
-    for (let i = numberOfEntriesToSkip; i < rgbaImageData.length; i += 4 + numberOfEntriesToSkip) {
-      const rgbColor = new RGBColor([
-        rgbaImageData[i + RED_CHANNEL_INDEX],
-        rgbaImageData[i + GREEN_CHANNEL_INDEX],
-        rgbaImageData[i + BLUE_CHANNEL_INDEX],
-      ]);
-      rgbImageData.push(rgbColor);
-    }
-    return new RGBImage(rgbImageData);
-  }
-}
-
-class Interval {
-  constructor(begin, end) {
-    this.begin = begin;
-    this.end = end;
-  }
-  liesIn(value) {
-    return value >= this.begin && value <= this.end;
-  }
-  toString() {
-    return `[${this.begin}, ${this.end}]`;
-  }
-}
-
-const HIGHEST_QUALITY = 1;
-const LOWEST_QUALITY = 25;
-const VALID_QUALITIES = new Interval(HIGHEST_QUALITY, LOWEST_QUALITY);
-const DEFAULT_NUMBER_OF_COLORS = 8;
-const DEFAULT_QUALITY = HIGHEST_QUALITY;
-
-function validateMedianCutParameters(parameters) {
-  if (!parameters.imageElement && !parameters.rgbImage) {
-    return Promise.reject(
-      new RangeError('parameters argument should include either imageElement or rgbImage property')
-    );
-  }
-  if (parameters.imageElement) {
-    return validateImageElementConfiguration(parameters);
-  }
-  return validateRGBImageConfiguration(parameters);
-}
-async function validateImageElementConfiguration(parameters) {
-  const unknownProperties = getUnknownImageElementProperties(parameters);
-  if (unknownProperties.length !== 0) {
-    return Promise.reject(new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`));
-  }
-  const { imageElement } = parameters;
-  if (!(imageElement instanceof HTMLImageElement) && !(imageElement instanceof HTMLCanvasElement)) {
-    return Promise.reject(
-      new TypeError('imageElement property should be of type HTMLImageElement or HTMLCanvasElement')
-    );
-  }
-  if (imageElement instanceof HTMLImageElement) {
-    try {
-      await loadImage(imageElement);
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
-  return validateBaseConfiguration(parameters);
-}
-function getUnknownImageElementProperties(parameters) {
-  const properties = Object.keys(parameters);
-  const validProperties = ['imageElement', 'numberOfColors', 'quality'];
-  return properties.filter((property) => !validProperties.includes(property));
-}
-function validateRGBImageConfiguration(parameters) {
-  const unknownProperties = getUnknownRGBImageProperties(parameters);
-  if (unknownProperties.length !== 0) {
-    return Promise.reject(new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`));
-  }
-  const { rgbImage } = parameters;
-  if (!(rgbImage instanceof RGBImage)) {
-    return Promise.reject(new TypeError('image property should be of type RGBImage'));
-  }
-  return validateBaseConfiguration(parameters);
-}
-function getUnknownRGBImageProperties(parameters) {
-  const properties = Object.keys(parameters);
-  const validProperties = ['rgbImage', 'numberOfColors', 'quality'];
-  return properties.filter((property) => !validProperties.includes(property));
-}
-function validateBaseConfiguration(parameters) {
-  const { numberOfColors = DEFAULT_NUMBER_OF_COLORS, quality = DEFAULT_QUALITY } = parameters;
-  if (!Number.isInteger(numberOfColors)) {
-    return Promise.reject(new TypeError('numberOfColors property should be an integer'));
-  }
-  if (!(numberOfColors >= 1 && numberOfColors <= 256)) {
-    return Promise.reject(new RangeError('numberOfColors property should lie in [1, 256]'));
-  }
-  if (!Number.isInteger(quality)) {
-    return Promise.reject(new TypeError('quality property should be an integer'));
-  }
-  if (!VALID_QUALITIES.liesIn(quality)) {
-    return Promise.reject(new RangeError(`quality property should lie in ${VALID_QUALITIES.toString()}`));
-  }
-  if (parameters.imageElement) {
-    return Promise.resolve({ imageElement: parameters.imageElement, numberOfColors, quality });
-  }
-  return Promise.resolve({ rgbImage: parameters.rgbImage, numberOfColors, quality });
-}
-
-function quantizeImage(parameters) {
-  return runMedianCut(parameters, buildInverseColorMap);
-}
-function reduceImage(parameters) {
-  return runMedianCut(parameters, buildColorPalette);
-}
-async function runMedianCut(parameters, buildColorMap) {
-  try {
-    const validatedParameters = await validateMedianCutParameters(parameters);
-    const rgbImage = await extractRGBImage(validatedParameters);
-    const vboxes = findMostDominantColors(rgbImage, validatedParameters.numberOfColors);
-    const colorMap = buildColorMap(vboxes);
-    return colorMap;
-  } catch (error) {
-    return Promise.reject(error);
-  }
-}
-async function extractRGBImage(parameters) {
-  return parameters.rgbImage
-    ? parameters.rgbImage
-    : RGBImage.fromImageElement(parameters.imageElement, parameters.quality);
-}
-function findMostDominantColors(image, numberOfColors) {
-  let vboxes = [image.data];
-  for (let i = 0; i < numberOfColors - 1; i += 1) {
-    const largestVbox = findLargestVbox(vboxes);
-    const longestAxis = findLongestAxis(largestVbox);
-    const splittedVboxes = splitAlongAxis(largestVbox, longestAxis);
-    vboxes.splice(vboxes.indexOf(largestVbox), 1);
-    vboxes = vboxes.concat(splittedVboxes);
-  }
-  return vboxes;
-}
-function findLargestVbox(vboxes) {
-  return vboxes.reduce((previous, current) => (current.length > previous.length ? current : previous));
-}
-function findLongestAxis(vbox) {
-  class RGBColorAxis {
-    constructor(axis) {
-      this.axis = axis;
-      this.minMax = [255, 0];
-    }
-    updateMinMax(value) {
-      this.minMax = [Math.min(value, this.minMax[0]), Math.max(value, this.minMax[1])];
-    }
-    get width() {
-      return this.minMax[1] - this.minMax[0];
-    }
-  }
-  const rgbColorAxes = [
-    new RGBColorAxis(RED_CHANNEL_INDEX),
-    new RGBColorAxis(GREEN_CHANNEL_INDEX),
-    new RGBColorAxis(BLUE_CHANNEL_INDEX),
-  ];
-  vbox.forEach((color) => {
-    rgbColorAxes[RED_CHANNEL_INDEX].updateMinMax(color.red);
-    rgbColorAxes[GREEN_CHANNEL_INDEX].updateMinMax(color.green);
-    rgbColorAxes[BLUE_CHANNEL_INDEX].updateMinMax(color.blue);
-  });
-  const longestAxis = rgbColorAxes.reduce((previous, current) => (current.width > previous.width ? current : previous));
-  return longestAxis.axis;
-}
-function splitAlongAxis(vbox, axis) {
-  const median = findAxisMedian(vbox, axis);
-  const vboxes = splitOnAxisMedian(vbox, axis, median);
-  return vboxes;
-}
-function findAxisMedian(vbox, axis) {
-  const extractedChannelValues = vbox
-    .map((color) => color.channels[axis])
-    .sort((previous, current) => previous - current);
-  const median = extractedChannelValues[Math.floor(extractedChannelValues.length / 2) - 1];
-  return median;
-}
-function splitOnAxisMedian(vbox, axis, median) {
-  const groupByAxisMedian = (color) => (color.channels[axis] <= median ? 0 : 1);
-  const vboxes = vbox.reduce(
-    (accumulator, color) => {
-      accumulator[groupByAxisMedian(color)].push(color);
-      return accumulator;
-    },
-    [[], []]
-  );
-  return vboxes;
-}
-function buildInverseColorMap(vboxes) {
-  const inverseColorMap = vboxes.map((vbox) => {
-    const representativeColor = findRepresentativeColor(vbox);
-    return vbox.map((color) => ({
-      sourceColor: color,
-      representativeColor,
-    }));
-  });
-  return [].concat(...inverseColorMap);
-}
-function buildColorPalette(vboxes) {
-  return vboxes.map((vbox) => ({
-    color: findRepresentativeColor(vbox),
-    population: vbox.length,
-  }));
-}
-function findRepresentativeColor(vbox) {
-  const colorSum = vbox.reduce(
-    (accumulator, color) => [
-      accumulator[RED_CHANNEL_INDEX] + color.red,
-      accumulator[GREEN_CHANNEL_INDEX] + color.green,
-      accumulator[BLUE_CHANNEL_INDEX] + color.blue,
-    ],
-    [0, 0, 0]
-  );
-  const colorAverage = colorSum.map((channelSum) => Math.floor(channelSum / vbox.length + 0.5));
-  return new RGBColor([
-    colorAverage[RED_CHANNEL_INDEX],
-    colorAverage[GREEN_CHANNEL_INDEX],
-    colorAverage[BLUE_CHANNEL_INDEX],
-  ]);
+function hsluvToRgbColor(color) {
+  const rgbChannels = hsluv_1.hsluvToRgb(color.channels).map((channel) => Math.floor(channel * 255 + 0.5));
+  const rgbColor = new RGBColor(rgbChannels);
+  return rgbColor;
 }
 
 class HSLuvImage {
   constructor(data) {
     this.data = data;
-  }
-  static fromRGBImage(rgbImage, quality) {
-    const hsluvImageData = [];
-    const numberOfPixelsToSkip = quality - 1;
-    for (let i = numberOfPixelsToSkip; i < rgbImage.data.length; i += 1 + numberOfPixelsToSkip) {
-      const rgbChannels = [rgbImage.data[i].red, rgbImage.data[i].green, rgbImage.data[i].blue];
-      const rgbColor = new RGBColor(rgbChannels);
-      const hsluvColor = rgbColor.toHSLuvColor();
-      hsluvImageData.push(hsluvColor);
-    }
-    return new HSLuvImage(hsluvImageData);
   }
   static async fromImageElement(imageElement, quality) {
     const hsluvImageData = [];
@@ -707,7 +700,18 @@ class HSLuvImage {
         rgbaImageData[i + BLUE_CHANNEL_INDEX],
       ];
       const rgbColor = new RGBColor(rgbChannels);
-      const hsluvColor = rgbColor.toHSLuvColor();
+      const hsluvColor = rgbToHSLuvColor(rgbColor);
+      hsluvImageData.push(hsluvColor);
+    }
+    return new HSLuvImage(hsluvImageData);
+  }
+  static fromRGBImage(rgbImage, quality) {
+    const hsluvImageData = [];
+    const numberOfPixelsToSkip = quality - 1;
+    for (let i = numberOfPixelsToSkip; i < rgbImage.data.length; i += 1 + numberOfPixelsToSkip) {
+      const rgbChannels = [rgbImage.data[i].red, rgbImage.data[i].green, rgbImage.data[i].blue];
+      const rgbColor = new RGBColor(rgbChannels);
+      const hsluvColor = rgbToHSLuvColor(rgbColor);
       hsluvImageData.push(hsluvColor);
     }
     return new HSLuvImage(hsluvImageData);
@@ -760,16 +764,14 @@ var validatePopularityParameters = async function validatePopularityParameters(p
   if (!(lightness >= 1 && lightness <= 100)) {
     return Promise.reject(new RangeError('lightness in regionSize property should lie in [1, 100]'));
   }
-  try {
+  return asyncTry(async () => {
     const validatedBaseParameters = await validateBaseParameters(parameters);
     return Promise.resolve(
       _extends({}, validatedBaseParameters, {
         regionSize,
       })
     );
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  });
 };
 function getUnknownProperties(parameters) {
   if (parameters.imageElement) {
@@ -824,7 +826,7 @@ function mapChannelToRegionID(intervals, channel) {
 }
 
 var popularizeImage = async function popularizeImage(parameters) {
-  try {
+  return asyncTry(async () => {
     const validatedParameters = await validatePopularityParameters(parameters);
     const hsluvImage = await extractHSLuvImage(validatedParameters);
     const colorPalette = buildColorPalette$1(
@@ -833,9 +835,7 @@ var popularizeImage = async function popularizeImage(parameters) {
       validatedParameters.numberOfColors
     );
     return colorPalette;
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  });
 };
 async function extractHSLuvImage(parameters) {
   return parameters.rgbImage
@@ -892,7 +892,7 @@ function findMostDominantColor(histogram) {
     }))
     .reduce((previous, current) => (current.population > previous.population ? current : previous));
   return {
-    color: mostDominantColorEntry.color.toRGBColor(),
+    color: hsluvToRgbColor(mostDominantColorEntry.color),
     population: getRegionPopulation(histogram),
   };
 }
@@ -955,13 +955,13 @@ class AsyncQueue {
 function loadVideo(videoElement, delay = 2000) {
   const loadVideoPromise = new Promise((resolve) => {
     const onVideoLoad = () => {
-      resolve();
       videoElement.removeEventListener('loadeddata', onVideoLoad);
+      resolve();
     };
     videoElement.addEventListener('loadeddata', onVideoLoad);
     if (videoElement.readyState === 4) {
-      resolve();
       videoElement.removeEventListener('loadeddata', onVideoLoad);
+      resolve();
     }
   });
   const timeoutPromise = new Promise((resolve, reject) => {

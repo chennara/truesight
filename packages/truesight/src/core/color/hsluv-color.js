@@ -1,9 +1,5 @@
 // @flow
 
-import hsluv from 'hsluv';
-
-import { RGBColor } from './rgb-color';
-
 export class HSLuvColor {
   channels: [number, number, number];
 
@@ -13,13 +9,6 @@ export class HSLuvColor {
 
   toString(): string {
     return this.channels.toString();
-  }
-
-  toRGBColor(): RGBColor {
-    const rgbChannels = hsluv.hsluvToRgb(this.channels).map((channel) => Math.floor(channel * 255 + 0.5));
-    const rgbColor = new RGBColor(rgbChannels);
-
-    return rgbColor;
   }
 
   static fromString(colorString: string): HSLuvColor {

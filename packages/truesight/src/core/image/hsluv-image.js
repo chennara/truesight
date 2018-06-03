@@ -3,6 +3,8 @@
 import { HSLuvColor } from 'core/color/hsluv-color';
 import { RGBColor, RED_CHANNEL_INDEX, GREEN_CHANNEL_INDEX, BLUE_CHANNEL_INDEX } from 'core/color/rgb-color';
 
+import { rgbToHSLuvColor } from '../color/conversion';
+
 import type { ImageElement } from './image-element';
 import { RGBImage } from './rgb-image';
 import getImageData from './get-image-data';
@@ -27,7 +29,7 @@ export class HSLuvImage {
         rgbaImageData[i + BLUE_CHANNEL_INDEX],
       ];
       const rgbColor = new RGBColor(rgbChannels);
-      const hsluvColor = rgbColor.toHSLuvColor();
+      const hsluvColor = rgbToHSLuvColor(rgbColor);
 
       hsluvImageData.push(hsluvColor);
     }
@@ -43,7 +45,7 @@ export class HSLuvImage {
     for (let i = numberOfPixelsToSkip; i < rgbImage.data.length; i += 1 + numberOfPixelsToSkip) {
       const rgbChannels = [rgbImage.data[i].red, rgbImage.data[i].green, rgbImage.data[i].blue];
       const rgbColor = new RGBColor(rgbChannels);
-      const hsluvColor = rgbColor.toHSLuvColor();
+      const hsluvColor = rgbToHSLuvColor(rgbColor);
 
       hsluvImageData.push(hsluvColor);
     }
