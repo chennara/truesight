@@ -1,6 +1,6 @@
 // @flow
 
-export default async function loadImage(imageElement: HTMLImageElement, delay: number = 2000): Promise<void> {
+export default function loadImage(imageElement: HTMLImageElement, delay: number = 2000): Promise<void> {
   const loadImagePromise = new Promise((resolve) => {
     const onImageLoad = () => {
       imageElement.removeEventListener('load', onImageLoad);

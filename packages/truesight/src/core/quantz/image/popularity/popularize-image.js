@@ -4,7 +4,6 @@ import { HSLuvImage } from 'core/image/hsluv-image';
 import { HSLuvColor } from 'core/color/hsluv-color';
 import { RGBColor } from 'core/color/rgb-color';
 import { hsluvToRgbColor } from 'core/color/conversion';
-import { asyncTry } from 'utils/fp/try';
 
 import type { PopularityParameters, ValidatedPopularityParameters, RegionSize } from './types';
 import validatePopularityParameters from './validate-parameters';
@@ -26,17 +25,15 @@ type ImageHistogram = [string, RegionHistogram][];
 type RegionHistogram = [string, number][];
 
 export default async function popularizeImage(parameters: PopularityParameters): Promise<ColorPalette> {
-  return asyncTry(async () => {
-    const validatedParameters = await validatePopularityParameters(parameters);
-    const hsluvImage = await extractHSLuvImage(validatedParameters);
-    const colorPalette = buildColorPalette(
-      hsluvImage,
-      validatedParameters.regionSize,
-      validatedParameters.numberOfColors
-    );
+  const validatedParameters = await validatePopularityParameters(parameters);
+  const hsluvImage = await extractHSLuvImage(validatedParameters);
+  const colorPalette = buildColorPalette(
+    hsluvImage,
+    validatedParameters.regionSize,
+    validatedParameters.numberOfColors
+  );
 
-    return colorPalette;
-  });
+  return colorPalette;
 }
 
 async function extractHSLuvImage(parameters: ValidatedPopularityParameters): Promise<HSLuvImage> {

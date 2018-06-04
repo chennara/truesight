@@ -1,7 +1,5 @@
 // @flow
 
-import { asyncTry } from 'utils/fp/try';
-
 import type { ImageElement } from './image-element';
 import loadImage from './load-image';
 
@@ -15,14 +13,12 @@ export default async function getImageData(imageElement: ImageElement): Promise<
 }
 
 async function getImageDataFromHTMLImageElement(imageElement: HTMLImageElement): Promise<Uint8ClampedArray> {
-  return asyncTry(async () => {
-    await loadImage(imageElement);
+  await loadImage(imageElement);
 
-    const canvasElement = drawImageToCanvas(imageElement);
-    const imageData = getImageDataFromHTMLCanvasElement(canvasElement);
+  const canvasElement = drawImageToCanvas(imageElement);
+  const imageData = getImageDataFromHTMLCanvasElement(canvasElement);
 
-    return imageData;
-  });
+  return imageData;
 }
 
 function drawImageToCanvas(imageElement: HTMLImageElement): HTMLCanvasElement {

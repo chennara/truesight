@@ -30,15 +30,7 @@
   const GREEN_CHANNEL_INDEX = 1;
   const BLUE_CHANNEL_INDEX = 2;
 
-  async function asyncTry(fn) {
-    try {
-      return await fn();
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
-
-  var loadImage = async function loadImage(imageElement, delay = 2000) {
+  function loadImage(imageElement, delay = 2000) {
     const loadImagePromise = new Promise((resolve) => {
       const onImageLoad = () => {
         imageElement.removeEventListener('load', onImageLoad);
@@ -56,7 +48,7 @@
       }, delay);
     });
     return Promise.race([loadImagePromise, timeoutPromise]);
-  };
+  }
 
   var getImageData = async function getImageData(imageElement) {
     if (imageElement instanceof HTMLImageElement) {
@@ -65,12 +57,10 @@
     return getImageDataFromHTMLCanvasElement(imageElement);
   };
   async function getImageDataFromHTMLImageElement(imageElement) {
-    return asyncTry(async () => {
-      await loadImage(imageElement);
-      const canvasElement = drawImageToCanvas(imageElement);
-      const imageData = getImageDataFromHTMLCanvasElement(canvasElement);
-      return imageData;
-    });
+    await loadImage(imageElement);
+    const canvasElement = drawImageToCanvas(imageElement);
+    const imageData = getImageDataFromHTMLCanvasElement(canvasElement);
+    return imageData;
   }
   function drawImageToCanvas(imageElement) {
     const canvasElement = document.createElement('canvas');
@@ -106,6 +96,15 @@
     }
   }
 
+  function hasUnknownProperties(parameters, validProperties) {
+    const properties = Object.keys(parameters);
+    const unknownProperties = properties.filter((property) => !validProperties.includes(property));
+    if (unknownProperties.length !== 0) {
+      return new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`);
+    }
+    return undefined;
+  }
+
   class Interval {
     constructor(begin, end) {
       this.begin = begin;
@@ -125,75 +124,58 @@
   const DEFAULT_NUMBER_OF_COLORS = 8;
   const DEFAULT_QUALITY = HIGHEST_QUALITY;
 
-  function validateMedianCutParameters(parameters) {
+  var validateMedianCutParameters = async function validateMedianCutParameters(parameters) {
     if (!parameters.imageElement && !parameters.rgbImage) {
-      return Promise.reject(
-        new RangeError('parameters argument should include either imageElement or rgbImage property')
-      );
+      throw new RangeError('parameters argument should include either imageElement or rgbImage property');
     }
     if (parameters.imageElement) {
       return validateImageElementConfiguration(parameters);
     }
     return validateRGBImageConfiguration(parameters);
-  }
+  };
   async function validateImageElementConfiguration(parameters) {
-    const unknownProperties = getUnknownImageElementProperties(parameters);
-    if (unknownProperties.length !== 0) {
-      return Promise.reject(new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`));
+    const unknownProperties = hasUnknownProperties(parameters, ['imageElement', 'numberOfColors', 'quality']);
+    if (unknownProperties instanceof Error) {
+      throw unknownProperties;
     }
     const { imageElement } = parameters;
     if (!(imageElement instanceof HTMLImageElement) && !(imageElement instanceof HTMLCanvasElement)) {
-      return Promise.reject(
-        new TypeError('imageElement property should be of type HTMLImageElement or HTMLCanvasElement')
-      );
+      throw new TypeError('imageElement property should be of type HTMLImageElement or HTMLCanvasElement');
     }
     if (imageElement instanceof HTMLImageElement) {
-      return asyncTry(async () => {
-        await loadImage(imageElement);
-        return validateBaseConfiguration(parameters);
-      });
+      await loadImage(imageElement);
     }
     return validateBaseConfiguration(parameters);
   }
-  function getUnknownImageElementProperties(parameters) {
-    const properties = Object.keys(parameters);
-    const validProperties = ['imageElement', 'numberOfColors', 'quality'];
-    return properties.filter((property) => !validProperties.includes(property));
-  }
   function validateRGBImageConfiguration(parameters) {
-    const unknownProperties = getUnknownRGBImageProperties(parameters);
-    if (unknownProperties.length !== 0) {
-      return Promise.reject(new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`));
+    const unknownProperties = hasUnknownProperties(parameters, ['rgbImage', 'numberOfColors', 'quality']);
+    if (unknownProperties instanceof Error) {
+      throw unknownProperties;
     }
     const { rgbImage } = parameters;
     if (!(rgbImage instanceof RGBImage)) {
-      return Promise.reject(new TypeError('image property should be of type RGBImage'));
+      throw new TypeError('image property should be of type RGBImage');
     }
     return validateBaseConfiguration(parameters);
   }
-  function getUnknownRGBImageProperties(parameters) {
-    const properties = Object.keys(parameters);
-    const validProperties = ['rgbImage', 'numberOfColors', 'quality'];
-    return properties.filter((property) => !validProperties.includes(property));
-  }
-  function validateBaseConfiguration(parameters) {
+  async function validateBaseConfiguration(parameters) {
     const { numberOfColors = DEFAULT_NUMBER_OF_COLORS, quality = DEFAULT_QUALITY } = parameters;
     if (!Number.isInteger(numberOfColors)) {
-      return Promise.reject(new TypeError('numberOfColors property should be an integer'));
+      throw new TypeError('numberOfColors property should be an integer');
     }
     if (!(numberOfColors >= 1 && numberOfColors <= 256)) {
-      return Promise.reject(new RangeError('numberOfColors property should lie in [1, 256]'));
+      throw new RangeError('numberOfColors property should lie in [1, 256]');
     }
     if (!Number.isInteger(quality)) {
-      return Promise.reject(new TypeError('quality property should be an integer'));
+      throw new TypeError('quality property should be an integer');
     }
     if (!VALID_QUALITIES.liesIn(quality)) {
-      return Promise.reject(new RangeError(`quality property should lie in ${VALID_QUALITIES.toString()}`));
+      throw new RangeError(`quality property should lie in ${VALID_QUALITIES.toString()}`);
     }
     if (parameters.imageElement) {
-      return Promise.resolve({ imageElement: parameters.imageElement, numberOfColors, quality });
+      return { imageElement: parameters.imageElement, numberOfColors, quality };
     }
-    return Promise.resolve({ rgbImage: parameters.rgbImage, numberOfColors, quality });
+    return { rgbImage: parameters.rgbImage, numberOfColors, quality };
   }
 
   function quantizeImage(parameters) {
@@ -203,13 +185,11 @@
     return runMedianCut(parameters, buildColorPalette);
   }
   async function runMedianCut(parameters, buildColorMap) {
-    return asyncTry(async () => {
-      const validatedParameters = await validateMedianCutParameters(parameters);
-      const rgbImage = await extractRGBImage(validatedParameters);
-      const vboxes = findMostDominantColors(rgbImage, validatedParameters.numberOfColors);
-      const colorMap = buildColorMap(vboxes);
-      return colorMap;
-    });
+    const validatedParameters = await validateMedianCutParameters(parameters);
+    const rgbImage = await extractRGBImage(validatedParameters);
+    const vboxes = findMostDominantColors(rgbImage, validatedParameters.numberOfColors);
+    const colorMap = buildColorMap(vboxes);
+    return colorMap;
   }
   async function extractRGBImage(parameters) {
     return parameters.rgbImage
@@ -748,57 +728,41 @@
     };
 
   var validatePopularityParameters = async function validatePopularityParameters(parameters) {
-    const unknownProperties = getUnknownProperties(parameters);
-    if (unknownProperties.length !== 0) {
-      return Promise.reject(new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`));
+    const unknownProperties = hasUnknownPopularityProperties(parameters);
+    if (unknownProperties instanceof Error) {
+      throw unknownProperties;
     }
     const { regionSize = DEFAULT_REGION_SIZE } = parameters;
     if (regionSize.length !== 3) {
-      return Promise.reject(new TypeError('regionSize property should be of type [number, number, number]'));
+      throw new TypeError('regionSize property should be of type [number, number, number]');
     }
     const [hue, saturation, lightness] = regionSize;
     if (!Number.isInteger(hue)) {
-      return Promise.reject(new TypeError('hue in regionSize property should be an integer'));
+      throw new TypeError('hue in regionSize property should be an integer');
     }
     if (!(hue >= 1 && hue <= 360)) {
-      return Promise.reject(new RangeError('hue in regionSize property should lie in [1, 360]'));
+      throw new RangeError('hue in regionSize property should lie in [1, 360]');
     }
     if (!Number.isInteger(saturation)) {
-      return Promise.reject(new TypeError('saturation in regionSize property should be an integer'));
+      throw new TypeError('saturation in regionSize property should be an integer');
     }
     if (!(saturation >= 1 && saturation <= 100)) {
-      return Promise.reject(new RangeError('saturation in regionSize property should lie in [1, 100]'));
+      throw new RangeError('saturation in regionSize property should lie in [1, 100]');
     }
     if (!Number.isInteger(lightness)) {
-      return Promise.reject(new TypeError('lightness in regionSize property should be an integer'));
+      throw new TypeError('lightness in regionSize property should be an integer');
     }
     if (!(lightness >= 1 && lightness <= 100)) {
-      return Promise.reject(new RangeError('lightness in regionSize property should lie in [1, 100]'));
+      throw new RangeError('lightness in regionSize property should lie in [1, 100]');
     }
-    return asyncTry(async () => {
-      const validatedBaseParameters = await validateBaseParameters(parameters);
-      return Promise.resolve(
-        _extends({}, validatedBaseParameters, {
-          regionSize,
-        })
-      );
-    });
+    const validatedBaseParameters = await validateBaseParameters(parameters);
+    return _extends({}, validatedBaseParameters, { regionSize });
   };
-  function getUnknownProperties(parameters) {
+  function hasUnknownPopularityProperties(parameters) {
     if (parameters.imageElement) {
-      return getUnknownImageElementProperties$1(parameters);
+      return hasUnknownProperties(parameters, ['imageElement', 'numberOfColors', 'quality', 'regionSize']);
     }
-    return getUnknownRGBImageProperties$1(parameters);
-  }
-  function getUnknownImageElementProperties$1(parameters) {
-    const properties = Object.keys(parameters);
-    const validProperties = ['imageElement', 'numberOfColors', 'quality', 'regionSize'];
-    return properties.filter((property) => !validProperties.includes(property));
-  }
-  function getUnknownRGBImageProperties$1(parameters) {
-    const properties = Object.keys(parameters);
-    const validProperties = ['rgbImage', 'numberOfColors', 'quality', 'regionSize'];
-    return properties.filter((property) => !validProperties.includes(property));
+    return hasUnknownProperties(parameters, ['rgbImage', 'numberOfColors', 'quality', 'regionSize']);
   }
   function validateBaseParameters(parameters) {
     if (parameters.imageElement) {
@@ -837,16 +801,14 @@
   }
 
   var popularizeImage = async function popularizeImage(parameters) {
-    return asyncTry(async () => {
-      const validatedParameters = await validatePopularityParameters(parameters);
-      const hsluvImage = await extractHSLuvImage(validatedParameters);
-      const colorPalette = buildColorPalette$1(
-        hsluvImage,
-        validatedParameters.regionSize,
-        validatedParameters.numberOfColors
-      );
-      return colorPalette;
-    });
+    const validatedParameters = await validatePopularityParameters(parameters);
+    const hsluvImage = await extractHSLuvImage(validatedParameters);
+    const colorPalette = buildColorPalette$1(
+      hsluvImage,
+      validatedParameters.regionSize,
+      validatedParameters.numberOfColors
+    );
+    return colorPalette;
   };
   async function extractHSLuvImage(parameters) {
     return parameters.rgbImage
@@ -940,15 +902,15 @@
     [Symbol.asyncIterator]() {
       return this;
     }
-    next() {
+    async next() {
       if (this.values.length > 0) {
         const value = this.values.shift();
         if (value instanceof Error) {
-          return Promise.reject(value);
+          throw value;
         }
-        return Promise.resolve({ done: false, value });
+        return { done: false, value };
       } else if (this.closed) {
-        return Promise.resolve({ done: true });
+        return { done: true };
       }
       return new Promise((resolve, reject) => {
         this.settlers.push({ resolve, reject });
@@ -983,73 +945,59 @@
     return Promise.race([loadVideoPromise, timeoutPromise]);
   }
 
+  async function asyncTry(fn) {
+    try {
+      return await fn();
+    } catch (error) {
+      return error;
+    }
+  }
+
   const DEFAULT_SECONDS_BETWEEN_FRAMES = 1;
 
   var validateParameters = async function validateVideoParsingParameters(parameters) {
-    const unknownProperties = getUnknownProperties$1(parameters);
-    if (unknownProperties.length !== 0) {
-      return Promise.reject(new RangeError(`parameters argument includes unknown property ${unknownProperties[0]}`));
+    const unknownProperties = hasUnknownProperties(parameters, ['videoElement', 'secondsBetweenFrames']);
+    if (unknownProperties instanceof Error) {
+      throw unknownProperties;
     }
     const { videoElement, secondsBetweenFrames = DEFAULT_SECONDS_BETWEEN_FRAMES } = parameters;
     if (!videoElement) {
-      return Promise.reject(new RangeError('parameters argument should include videoElement property'));
+      throw new RangeError('parameters argument should include videoElement property');
     }
     if (!(videoElement instanceof HTMLVideoElement)) {
-      return Promise.reject(new TypeError('videoElement property should be of type HTMLVideoElement'));
+      throw new TypeError('videoElement property should be of type HTMLVideoElement');
     }
-    try {
-      await loadVideo(videoElement);
-    } catch (error) {
-      return Promise.reject(error);
-    }
+    await loadVideo(videoElement);
     if (videoElement.width === 0) {
-      return Promise.reject(new RangeError('width attribute in videoElement property is 0'));
+      throw new RangeError('width attribute in videoElement property is 0');
     }
     if (videoElement.height === 0) {
-      return Promise.reject(new RangeError('height attribute in videoElement property is 0'));
+      throw new RangeError('height attribute in videoElement property is 0');
     }
     if (!Number.isFinite(secondsBetweenFrames)) {
-      return Promise.reject(new TypeError('secondsBetweenFrames property should be a number'));
+      throw new TypeError('secondsBetweenFrames property should be a number');
     }
     if (secondsBetweenFrames <= 0) {
-      return Promise.reject(new RangeError('secondsBetweenFrames property should be greater than 0'));
+      throw new RangeError('secondsBetweenFrames property should be greater than 0');
     }
-    return Promise.resolve({ videoElement, secondsBetweenFrames });
+    return { videoElement, secondsBetweenFrames };
   };
-  function getUnknownProperties$1(parameters) {
-    const properties = Object.keys(parameters);
-    const validProperties = ['videoElement', 'secondsBetweenFrames'];
-    return properties.filter((property) => !validProperties.includes(property));
-  }
 
   var parseVideo = async function* parseVideo(parameters, parseFrame) {
-    try {
-      const validatedParameters = await validateParameters(parameters);
-      yield* parseFrames(validatedParameters, parseFrame);
-    } catch (error) {
-      throw error;
-    }
+    const validatedParameters = await validateParameters(parameters);
+    yield* parseFrames(validatedParameters, parseFrame);
   };
   async function* parseFrames(parameters, parseFrame) {
     const parsingResults = new AsyncQueue();
     const videoElement = parameters.videoElement.cloneNode();
-    try {
-      videoElement.preload = 'auto';
-      await loadVideo(videoElement);
-    } catch (error) {
-      throw error;
-    }
+    videoElement.preload = 'auto';
+    await loadVideo(videoElement);
     let currentTime = 0;
     let index = 1;
     videoElement.currentTime = currentTime;
     const parseNextFrame = async () => {
       const canvasElement = drawFrameToCanvas(videoElement);
-      let parsingResult;
-      try {
-        parsingResult = await parseFrame(canvasElement);
-      } catch (error) {
-        parsingResult = error;
-      }
+      const parsingResult = asyncTry(() => parseFrame(canvasElement));
       parsingResults.enqueue({
         index,
         timestamp: currentTime,

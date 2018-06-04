@@ -44,17 +44,17 @@ export class AsyncQueue<T> {
     return this;
   }
 
-  next(): Promise<IteratorResult<T>> {
+  async next(): Promise<IteratorResult<T>> {
     if (this.values.length > 0) {
       const value = this.values.shift();
 
       if (value instanceof Error) {
-        return Promise.reject(value);
+        throw value;
       }
 
-      return Promise.resolve({ done: false, value });
+      return { done: false, value };
     } else if (this.closed) {
-      return Promise.resolve({ done: true });
+      return { done: true };
     }
 
     return new Promise((resolve, reject) => {

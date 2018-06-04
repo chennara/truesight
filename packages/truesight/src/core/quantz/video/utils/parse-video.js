@@ -16,13 +16,9 @@ export default async function* parseVideo<T>(
   parameters: VideoParsingParameters,
   parseFrame: ParseFrame<T>
 ): AsyncParsingResultGenerator<T> {
-  try {
-    const validatedParameters = await validateParameters(parameters);
+  const validatedParameters = await validateParameters(parameters);
 
-    yield* parseFrames(validatedParameters, parseFrame);
-  } catch (error) {
-    throw error;
-  }
+  yield* parseFrames(validatedParameters, parseFrame);
 }
 
 async function* parseFrames<T>(
@@ -33,12 +29,8 @@ async function* parseFrames<T>(
 
   const videoElement = parameters.videoElement.cloneNode();
 
-  try {
-    videoElement.preload = 'auto';
-    await loadVideo(videoElement);
-  } catch (error) {
-    throw error;
-  }
+  videoElement.preload = 'auto';
+  await loadVideo(videoElement);
 
   let currentTime = 0;
   let index = 1;
@@ -49,7 +41,6 @@ async function* parseFrames<T>(
     const canvasElement = drawFrameToCanvas(videoElement);
 
     let parsingResult;
-
     try {
       parsingResult = await parseFrame(canvasElement);
     } catch (error) {

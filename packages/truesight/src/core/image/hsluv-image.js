@@ -2,8 +2,7 @@
 
 import { HSLuvColor } from 'core/color/hsluv-color';
 import { RGBColor, RED_CHANNEL_INDEX, GREEN_CHANNEL_INDEX, BLUE_CHANNEL_INDEX } from 'core/color/rgb-color';
-
-import { rgbToHSLuvColor } from '../color/conversion';
+import { rgbToHSLuvColor } from 'core/color/conversion';
 
 import type { ImageElement } from './image-element';
 import { RGBImage } from './rgb-image';
