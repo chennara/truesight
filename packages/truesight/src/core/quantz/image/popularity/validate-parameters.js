@@ -7,7 +7,12 @@ import type { ValidatedMedianCutParameters } from '../median-cut/types';
 import validateMedianCutParameters from '../median-cut/validate-parameters';
 
 import type { PopularityParameters, ValidatedPopularityParameters } from './types';
-import { DEFAULT_REGION_SIZE } from './types';
+import {
+  DEFAULT_REGION_SIZE,
+  VALID_HUE_REGION_SIZES,
+  VALID_LIGTHNESS_REGION_SIZES,
+  VALID_SATURATION_REGION_SIZES,
+} from './types';
 
 export default async function validatePopularityParameters(
   parameters: PopularityParameters
@@ -29,22 +34,22 @@ export default async function validatePopularityParameters(
   if (!Number.isInteger(hue)) {
     throw new TypeError('hue in regionSize property should be an integer');
   }
-  if (!(hue >= 1 && hue <= 360)) {
-    throw new RangeError('hue in regionSize property should lie in [1, 360]');
+  if (!VALID_HUE_REGION_SIZES.liesIn(hue)) {
+    throw new RangeError(`hue in regionSize property should lie in ${VALID_HUE_REGION_SIZES.toString()}`);
   }
 
   if (!Number.isInteger(saturation)) {
     throw new TypeError('saturation in regionSize property should be an integer');
   }
-  if (!(saturation >= 1 && saturation <= 100)) {
-    throw new RangeError('saturation in regionSize property should lie in [1, 100]');
+  if (!VALID_SATURATION_REGION_SIZES.liesIn(saturation)) {
+    throw new RangeError(`saturation in regionSize property should lie in ${VALID_SATURATION_REGION_SIZES.toString()}`);
   }
 
   if (!Number.isInteger(lightness)) {
     throw new TypeError('lightness in regionSize property should be an integer');
   }
-  if (!(lightness >= 1 && lightness <= 100)) {
-    throw new RangeError('lightness in regionSize property should lie in [1, 100]');
+  if (!VALID_LIGTHNESS_REGION_SIZES.liesIn(lightness)) {
+    throw new RangeError(`lightness in regionSize property should lie in ${VALID_LIGTHNESS_REGION_SIZES.toString()}`);
   }
 
   const validatedBaseParameters = await validateBaseParameters(parameters);

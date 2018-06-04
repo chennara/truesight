@@ -701,6 +701,9 @@ class HSLuvImage {
 }
 
 const DEFAULT_REGION_SIZE = [15, 20, 20];
+const VALID_HUE_REGION_SIZES = new Interval(1, 360);
+const VALID_SATURATION_REGION_SIZES = new Interval(1, 100);
+const VALID_LIGTHNESS_REGION_SIZES = new Interval(1, 100);
 
 var _extends =
   Object.assign ||
@@ -731,20 +734,20 @@ var validatePopularityParameters = async function validatePopularityParameters(p
   if (!Number.isInteger(hue)) {
     throw new TypeError('hue in regionSize property should be an integer');
   }
-  if (!(hue >= 1 && hue <= 360)) {
-    throw new RangeError('hue in regionSize property should lie in [1, 360]');
+  if (!VALID_HUE_REGION_SIZES.liesIn(hue)) {
+    throw new RangeError(`hue in regionSize property should lie in ${VALID_HUE_REGION_SIZES.toString()}`);
   }
   if (!Number.isInteger(saturation)) {
     throw new TypeError('saturation in regionSize property should be an integer');
   }
-  if (!(saturation >= 1 && saturation <= 100)) {
-    throw new RangeError('saturation in regionSize property should lie in [1, 100]');
+  if (!VALID_SATURATION_REGION_SIZES.liesIn(saturation)) {
+    throw new RangeError(`saturation in regionSize property should lie in ${VALID_SATURATION_REGION_SIZES.toString()}`);
   }
   if (!Number.isInteger(lightness)) {
     throw new TypeError('lightness in regionSize property should be an integer');
   }
-  if (!(lightness >= 1 && lightness <= 100)) {
-    throw new RangeError('lightness in regionSize property should lie in [1, 100]');
+  if (!VALID_LIGTHNESS_REGION_SIZES.liesIn(lightness)) {
+    throw new RangeError(`lightness in regionSize property should lie in ${VALID_LIGTHNESS_REGION_SIZES.toString()}`);
   }
   const validatedBaseParameters = await validateBaseParameters(parameters);
   return _extends({}, validatedBaseParameters, { regionSize });
@@ -936,14 +939,6 @@ function loadVideo(videoElement, delay = 2000) {
   return Promise.race([loadVideoPromise, timeoutPromise]);
 }
 
-async function asyncTry(fn) {
-  try {
-    return await fn();
-  } catch (error) {
-    return error;
-  }
-}
-
 const DEFAULT_SECONDS_BETWEEN_FRAMES = 1;
 
 var validateParameters = async function validateVideoParsingParameters(parameters) {
@@ -988,7 +983,12 @@ async function* parseFrames(parameters, parseFrame) {
   videoElement.currentTime = currentTime;
   const parseNextFrame = async () => {
     const canvasElement = drawFrameToCanvas(videoElement);
-    const parsingResult = asyncTry(() => parseFrame(canvasElement));
+    let parsingResult;
+    try {
+      parsingResult = await parseFrame(canvasElement);
+    } catch (error) {
+      parsingResult = error;
+    }
     parsingResults.enqueue({
       index,
       timestamp: currentTime,
