@@ -19,7 +19,7 @@ describe('median cut should return an error if invalid video quantization parame
 
   it('reduceVideo should return a TypeError if secondsBetweenFrames property is not a number', () => {
     const parsingResultStream = quantizeVideo({
-      videoElement: createVideoElement(40, 30, 'base/test/resources/videos/stars.mp4'),
+      videoElement: createVideoElement(40, 30, 'base/test/resources/videos/turntable.mp4'),
       secondsBetweenFrames: 'four',
     });
 
@@ -49,7 +49,7 @@ describe('median cut should return a stream of parsing results', () => {
     this.timeout(10000);
 
     const parsingResultStream = reduceVideo({
-      videoElement: createVideoElement(40, 30, 'base/test/resources/videos/stars.mp4'),
+      videoElement: createVideoElement(40, 30, 'base/test/resources/videos/turntable.mp4'),
       secondsBetweenFrames: 4,
     });
 

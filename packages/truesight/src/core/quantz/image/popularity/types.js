@@ -43,7 +43,7 @@ export type ValidatedImageElementConfiguration = {|
 export type RegionSize = [number, number, number];
 
 // Default region size dimensions for the popularity algorithm.
-export const DEFAULT_REGION_SIZE: RegionSize = [15, 20, 20];
+export const DEFAULT_REGION_SIZE: RegionSize = [15, 18, 18];
 
 // An interval of valid hue region sizes.
 export const VALID_HUE_REGION_SIZES = new Interval(1, 360);

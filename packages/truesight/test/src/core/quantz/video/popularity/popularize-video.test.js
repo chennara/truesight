@@ -21,7 +21,7 @@ describe('popularizeVideo should return a stream of parsing results', () => {
     this.timeout(10000);
 
     const parsingResultStream = popularizeVideo({
-      videoElement: createVideoElement(436, 83, 'base/test/resources/videos/stars.mp4'),
+      videoElement: createVideoElement(436, 83, 'base/test/resources/videos/turntable.mp4'),
       secondsBetweenFrames: 2.1,
       numberOfColors: 5,
       quality: 4,

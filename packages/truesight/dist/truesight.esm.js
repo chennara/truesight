@@ -698,7 +698,7 @@ class HSLuvImage {
   }
 }
 
-const DEFAULT_REGION_SIZE = [15, 20, 20];
+const DEFAULT_REGION_SIZE = [15, 18, 18];
 const VALID_HUE_REGION_SIZES = new Interval(1, 360);
 const VALID_SATURATION_REGION_SIZES = new Interval(1, 100);
 const VALID_LIGTHNESS_REGION_SIZES = new Interval(1, 100);
@@ -765,28 +765,48 @@ function validateBaseParameters(parameters) {
   return validateMedianCutParameters({ rgbImage, numberOfColors, quality });
 }
 
+const BLACK_LIGHTNESS_UPPER_BOUND = 5;
+const WHITE_LIGHTNESS_LOWER_BOUND = 95;
+const GRAY_SATURATION_UPPER_BOUND = 10;
 function mapColorToRegionID(color, regionSize) {
+  const representativeColor = color;
+  if (color.lightness >= 0 && color.lightness < BLACK_LIGHTNESS_UPPER_BOUND) {
+    representativeColor.channels = [0, 0, 0];
+  } else if (color.lightness > WHITE_LIGHTNESS_LOWER_BOUND && color.lightness <= 100) {
+    representativeColor.channels = [0, 0, 100];
+  } else if (color.saturation >= 0 && color.saturation < GRAY_SATURATION_UPPER_BOUND) {
+    representativeColor.channels = [0, 0, color.lightness];
+  }
   const hueIntervals = [];
   for (let i = 0; i < 360 + regionSize[HUE_CHANNEL_INDEX]; i += regionSize[HUE_CHANNEL_INDEX]) {
     hueIntervals.push(Math.min(i, 360));
   }
-  const saturationIntervals = [];
-  for (let i = 0; i < 100 + regionSize[SATURATION_CHANNEL_INDEX]; i += regionSize[SATURATION_CHANNEL_INDEX]) {
+  const saturationIntervals = [0];
+  for (
+    let i = GRAY_SATURATION_UPPER_BOUND;
+    i < 100 + regionSize[SATURATION_CHANNEL_INDEX];
+    i += regionSize[SATURATION_CHANNEL_INDEX]
+  ) {
     saturationIntervals.push(Math.min(i, 100));
   }
-  const lightnessIntervals = [];
-  for (let i = 0; i < 100 + regionSize[LIGHTNESS_CHANNEL_INDEX]; i += regionSize[LIGHTNESS_CHANNEL_INDEX]) {
-    lightnessIntervals.push(Math.min(i, 100));
+  const lightnessIntervals = [0];
+  for (
+    let i = BLACK_LIGHTNESS_UPPER_BOUND;
+    i < WHITE_LIGHTNESS_LOWER_BOUND + regionSize[LIGHTNESS_CHANNEL_INDEX];
+    i += regionSize[LIGHTNESS_CHANNEL_INDEX]
+  ) {
+    lightnessIntervals.push(Math.min(i, WHITE_LIGHTNESS_LOWER_BOUND));
   }
+  lightnessIntervals.push(100);
   return [
-    mapChannelToRegionID(hueIntervals, color.hue),
-    mapChannelToRegionID(saturationIntervals, color.saturation),
-    mapChannelToRegionID(lightnessIntervals, color.lightness),
+    mapChannelToRegionID(hueIntervals, representativeColor.hue),
+    mapChannelToRegionID(saturationIntervals, representativeColor.saturation),
+    mapChannelToRegionID(lightnessIntervals, representativeColor.lightness),
   ].join(',');
 }
 function mapChannelToRegionID(intervals, channel) {
-  let i = 0;
-  while (channel >= intervals[i] && i < intervals.length) {
+  let i = channel === 0 ? 1 : 0;
+  while (channel > intervals[i] && i < intervals.length) {
     i += 1;
   }
   return [intervals[i - 1], intervals[i]].toString();

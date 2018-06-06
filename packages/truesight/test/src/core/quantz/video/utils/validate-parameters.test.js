@@ -10,7 +10,7 @@ describe('validating invalid video quantization parameters should return an erro
 
     const result = errorify(
       validateParameters({
-        videoElement: createVideoElement(40, 30, 'base/test/resources/videos/starts.mp4'),
+        videoElement: createVideoElement(40, 30, 'base/test/resources/videos/turnable.mp4'),
       })
     );
 

@@ -23,14 +23,14 @@ describe('parseVideo should parse the correct number of frames', () => {
     {
       name: 'should parse the correct number of frames if secondsBetweenFrames is 2.4',
       videoParsingParameters: {
-        videoElement: createVideoElement(19, 400, 'base/test/resources/videos/stars.mp4'),
+        videoElement: createVideoElement(19, 400, 'base/test/resources/videos/turntable.mp4'),
         secondsBetweenFrames: 2.4,
       },
     },
     {
       name: 'should only parse the first frame if secondsBetweenFrames is greater than the video length',
       videoParsingParameters: {
-        videoElement: createVideoElement(568, 502, 'base/test/resources/videos/stars.mp4'),
+        videoElement: createVideoElement(568, 502, 'base/test/resources/videos/turntable.mp4'),
         secondsBetweenFrames: 6.1,
       },
     },
@@ -64,8 +64,8 @@ describe('parseVideo should return a stream of parsing results', () => {
     this.timeout(10000);
 
     const videoParsingParameters = {
-      videoElement: createVideoElement(54, 70, 'base/test/resources/videos/stars.mp4'),
-      secondsBetweenFrames: 1.64,
+      videoElement: createVideoElement(54, 70, 'base/test/resources/videos/turntable.mp4'),
+      secondsBetweenFrames: 5.5,
     };
 
     const parseFrame = sinon.stub();
@@ -80,9 +80,9 @@ describe('parseVideo should return a stream of parsing results', () => {
 
     expect(parsingResults).to.deep.equal([
       { index: 1, timestamp: 0, result: 42 },
-      { index: 2, timestamp: 1.64, result: 14 },
-      { index: 3, timestamp: 3.28, result: 17 },
-      { index: 4, timestamp: 4.92, result: 956 },
+      { index: 2, timestamp: 5.5, result: 14 },
+      { index: 3, timestamp: 11, result: 17 },
+      { index: 4, timestamp: 16.5, result: 956 },
     ]);
   });
 
