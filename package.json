@@ -1,5 +1,7 @@
 {
   "private": true,
+  "author": "Chennara Nhes",
+  "license": "MIT",
   "scripts": {
     "lint": "eslint {**/*.js,**/*.md} --cache",
     "flow-check": "flow check --include-warnings",
