@@ -79,10 +79,10 @@ describe('parseVideo should return a stream of parsing results', () => {
     const parsingResults = await asyncCollect(parsingResultStream);
 
     expect(parsingResults).to.deep.equal([
-      { index: 1, timestamp: 0, result: 42 },
-      { index: 2, timestamp: 5.5, result: 14 },
-      { index: 3, timestamp: 11, result: 17 },
-      { index: 4, timestamp: 16.5, result: 956 },
+      { index: 0, timestamp: 0, result: 42 },
+      { index: 1, timestamp: 5.5, result: 14 },
+      { index: 2, timestamp: 11, result: 17 },
+      { index: 3, timestamp: 16.5, result: 956 },
     ]);
   });
 
@@ -105,12 +105,12 @@ describe('parseVideo should return a stream of parsing results', () => {
     const parsingResults = await asyncCollect(parsingResultStream);
 
     expect(parsingResults.slice(0, 2)).to.deep.equal([
-      { index: 1, timestamp: 0, result: 3 },
-      { index: 2, timestamp: 3.9, result: -73 },
+      { index: 0, timestamp: 0, result: 3 },
+      { index: 1, timestamp: 3.9, result: -73 },
     ]);
-    expect(parsingResults[2]).to.include({ index: 3, timestamp: 7.8 });
+    expect(parsingResults[2]).to.include({ index: 2, timestamp: 7.8 });
     expect(parsingResults[2].result).to.be.an('error');
-    expect(parsingResults[3]).to.deep.equal({ index: 4, timestamp: 11.7, result: 24 });
+    expect(parsingResults[3]).to.deep.equal({ index: 3, timestamp: 11.7, result: 24 });
   });
 });
 

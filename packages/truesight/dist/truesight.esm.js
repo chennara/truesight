@@ -997,7 +997,7 @@ async function* parseFrames(parameters, parseFrame) {
   videoElement.preload = 'auto';
   await loadVideo(videoElement);
   let currentTime = 0;
-  let index = 1;
+  let index = 0;
   videoElement.currentTime = currentTime;
   const parseNextFrame = async () => {
     const canvasElement = drawFrameToCanvas(videoElement);

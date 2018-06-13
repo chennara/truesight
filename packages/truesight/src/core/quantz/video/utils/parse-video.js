@@ -33,7 +33,7 @@ async function* parseFrames<T>(
   await loadVideo(videoElement);
 
   let currentTime = 0;
-  let index = 1;
+  let index = 0;
 
   videoElement.currentTime = currentTime;
 
