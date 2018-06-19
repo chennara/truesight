@@ -21,6 +21,11 @@ module.exports = (config) => {
         watched: false,
         included: false,
       },
+      {
+        pattern: 'test/resources/videos/*.mp4',
+        watched: false,
+        included: false,
+      },
     ],
     preprocessors: {
       'test/**/*.test.js': ['rollup'],
@@ -36,16 +41,16 @@ module.exports = (config) => {
           include: nodeModulesGlob,
         }),
         includePaths({
-          paths: [path.join(root, 'src')],
+          paths: [path.join(root, 'src'), path.join(root, 'test')],
           extensions: ['.js'],
         }),
         babel({
           exclude: nodeModulesGlob,
-          plugins: ['external-helpers', 'istanbul'],
+          plugins: ['istanbul'],
         }),
       ],
     },
-    frameworks: ['mocha', 'chai'],
+    frameworks: ['mocha', 'chai', 'sinon'],
     reporters: ['mocha', 'coverage'],
     browsers: ['ChromeHeadless'],
     singleRun: true,

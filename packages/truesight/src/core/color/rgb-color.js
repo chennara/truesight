@@ -1,22 +1,10 @@
 // @flow
 
-import hsluv from 'hsluv';
-
-import { HSLuvColor } from './hsluv-color';
-
 export class RGBColor {
   channels: [number, number, number];
 
   constructor(channels: [number, number, number]) {
     this.channels = channels;
-  }
-
-  toHSLuvColor(): HSLuvColor {
-    const rgbChannels = this.channels.map((channel) => channel / 255);
-    const hsluvChannels = hsluv.rgbToHsluv(rgbChannels);
-    const hsluvColor = new HSLuvColor(hsluvChannels);
-
-    return hsluvColor;
   }
 
   get red(): number {

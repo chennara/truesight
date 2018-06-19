@@ -1,0 +1,19 @@
+# Try to limit the subject line to 50 characters. $ <- 51st character
+# If applied, this commit will...                 $
+
+
+# Wrap the body at 72 characters.                                       $ <- 73rd character
+# Why is this change needed?                                            $
+
+
+# Any references to issue tracking IDs or pull request numbers?         $
+
+
+# Keep following guidelines in mind:
+# - Capitalize the subject line.
+# - Use the imperative mood in the subject line.
+# - Do not end the subject line with a period.
+# - Separate subject from body with a blank line.
+# - Use the body to explain 'what' and 'why' versus 'how'.
+
+# Reference: https://chris.beams.io/posts/git-commit/

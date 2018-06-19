@@ -3,7 +3,7 @@ module.exports = {
   extends: ['airbnb-base', 'plugin:flowtype/recommended', 'plugin:prettier/recommended'],
   parserOptions: {
     parser: 'babel-eslint',
-    ecmaVersion: 2017,
+    ecmaVersion: 2018,
     sourceType: 'module',
   },
   rules: {
@@ -15,6 +15,9 @@ module.exports = {
     'import/prefer-default-export': 'off',
     // - Following rule doesn't apply to 'var' declarations, since they are disallowed.
     'no-use-before-define': 'off',
+    // - Don't disallow for...of statements. The last two versions of Chrome already have built-in support for for...of
+    //   statements.
+    'no-restricted-syntax': ['error', 'ForInStatement', 'LabeledStatement', 'WithStatement'],
 
     // Override default Flow settings:
     'flowtype/require-parameter-type': ['error', { excludeArrowFunctions: true }],

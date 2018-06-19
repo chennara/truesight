@@ -1,9 +1,11 @@
 // @flow
 
-import { RGBImage } from './core/image/types/rgb-image';
-import ColorQuantization from './core/image/quantz';
+import { RGBImage } from './core/image/rgb-image';
+import ImageQuantizationAPI from './core/quantz/image';
+import VideoQuantizationAPI from './core/quantz/video';
 
 export default {
-  ...ColorQuantization,
   RGBImage,
+  ...ImageQuantizationAPI,
+  ...VideoQuantizationAPI,
 };

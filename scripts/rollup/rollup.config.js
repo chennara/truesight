@@ -3,8 +3,9 @@ import path from 'path';
 import resolveNodeModules from 'rollup-plugin-node-resolve';
 import cjsToESM from 'rollup-plugin-commonjs';
 import includePaths from 'rollup-plugin-includepaths';
-import stripFlowWhitespace from 'rollup-plugin-flow-no-whitespace';
 import babel from 'rollup-plugin-babel';
+import cleanup from 'rollup-plugin-cleanup';
+import prettier from 'rollup-plugin-prettier';
 import uglify from 'rollup-plugin-uglify';
 
 import browserBuilds from './browser-builds';
@@ -21,8 +22,8 @@ function generateBuildConfiguration(target) {
   if (target && target in builds) {
     build = builds[target];
   } else {
-    throw new TypeError(
-      `TARGET environment should be either ${Object.keys(builds)
+    throw new RangeError(
+      `TARGET environment should be set to either ${Object.keys(builds)
         .map((key) => `'${key}'`)
         .join(' or ')}`
     );
@@ -52,15 +53,23 @@ function generateBuildConfiguration(target) {
         paths: [path.join(build.root, 'src')],
         extensions: ['.js'],
       }),
-      stripFlowWhitespace(),
       babel({
         exclude: nodeModulesGlob,
-        plugins: ['external-helpers'],
       }),
     ],
   };
 
-  if (build.output.uglify) {
+  if (!build.output.uglify) {
+    config.plugins = config.plugins.concat([
+      cleanup(),
+      prettier({
+        printWidth: 120,
+        singleQuote: true,
+        trailingComma: 'es5',
+        arrowParens: 'always',
+      }),
+    ]);
+  } else {
     config.plugins.push(
       uglify({
         output: {
