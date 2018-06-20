@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>truesight</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans|PT+Mono">
+  <link rel="stylesheet" href="dist/css/main.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="header__title">Visualizing <span class="header__title--color">color</span> in storytelling</h1>
+      <a href="https://github.com/chennara/truesight">
+        <img class="header__icon" src="dist/images/github-mark.png" alt="GitHub">
+      </a>
+    </div>
+    <section class="text-content">
+      <h2>Introduction</h2>
+      <p>Color is an essential tool in storytelling. Filmmakers use color to subtly manipulate our emotions. A well-chosen color palette evokes mood and sets the tone without having to use any words. We're often not aware of how color affects us emotionally. By visualizing color in images and film, we can try to better understand and appreciate the work that was put into this.</p>
+      <p>This chapter displays a couple of use cases for the truesight library. We'll look at the color palette in Pixar's <a class="text-content--ref" href="https://www.imdb.com/title/tt2380307/?ref_=fn_al_tt_1">Coco (2017)</a> and how it helped to tell the story of Miguel, a 12-year-old Mexican boy aspiring to be a musician. We'll examine how Coco drew inspiration from Mexican culture and tradition. The result is a visually stunning film with amazing worldbuilding.</p>
+      <p>If you're interested in a more technical review for the truesight library, you might find what you're looking for in the GitHub <a class="text-content--ref" href="https://github.com/chennara/truesight/tree/master/packages/truesight">repository</a>.</p>
+    </section>
+    <section class="text-content">
+      <h2>Color in images</h2>
+      <p>Like most of Pixar's animations, Coco's usage of colors relies on a set of deeply saturated colors. These colors help in creating the lighthearted dreamworld we all love.</p>
+      <p>The film takes place during <a class="text-content--ref" href="https://en.wikipedia.org/wiki/Day_of_the_Dead">Día de los Muertos (Day of the Dead)</a>, a Mexican holiday where people come together to pray for and remember loved ones who have died. Coco is an ode to this lively celebrated festival. It reminds us of why we should keep honoring the memory of our ancestors.</p>
+      <p>Looking at the image below, it is not hard to see why director Lee Unkrich, <span class="text-content--quote">"couldn't help but be drawn to the striking visuals of Día de los Muertos"</span>. The items used to decorate the altar have highly saturated color values. Día de los Muertos is not meant to grieve for those who have died, but to remember all the happiness they brought into our lives.</p>
+    </section>
+    <div class="media-content">
+      <div class="truesight-image">
+        <img class="media-content__image" src="dist/images/dia-de-los-muertos_ofrenda.jpg">
+      </div>
+      <div class="media-content__caption">
+        A Día de los Muertos altar.
+      </div>
+    </div>
+    <section class="text-content">
+      <p>The color wheel in the upper right corner was generated using the <code>popularizeImage</code> function in the truesight library. It shows how shades of yellow and orange found in the marigold flower dominate the image. Visualizing color this way, should give you a good idea of the color harmony used.</p>
+    </section>
+    <section class="text-content">
+      <h2>Color in film</h2>
+      <p>Let the teaser trailer speak for itself. We can easily see how the yellowish and orangish colors from the marigold flower stand out. This beautifully shows how color aided in Coco's worldbuilding.</p>
+    </section>
+    <div class="media-content">
+      <div class="truesight-video">
+        <video class="media-content__video" src="dist/videos/coco_2017.mp4" controls></video>
+      </div>
+      <div class="media-content__caption">
+        Teaser <a class="text-content--ref" href="https://www.youtube.com/watch?v=zNCz4mQzfEI">trailer</a> for Coco (2017).
+      </div>
+    </div>
+    <section class="text-content">
+      <p>The trailer was parsed using the <code>popularizeVideo</code> function. Every new second it generated a color palette for the given frame, which was then drawn to the canvas element in the upper right corner.</p>
+    </section>
+    <div class="disclaimer">
+      <hr class="disclaimer__hline">
+      <p>The truesight source code is released under the <a class="text-content--ref" href="https://github.com/chennara/truesight/blob/master/LICENSE">MIT License</a>.</p>
+    </div>
+  </div>
+  <script type="text/javascript" src="dist/js/truesight.js"></script>
+</body>
+
+</html>

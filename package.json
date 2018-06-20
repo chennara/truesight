@@ -1,0 +1,55 @@
+{
+  "private": true,
+  "author": "Chennara Nhes",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint **/*.js --cache",
+    "flow-check": "flow check --include-warnings",
+    "prettify": "prettier --write {**/*.js,**/*.md}",
+    "compile-sass": "node-sass dist/scss/ -o dist/css/",
+    "watch-sass": "node-sass -w dist/scss/ -o dist/css/",
+    "start-dev": "webpack-dev-server --open --hot --config scripts/webpack.dev.js",
+    "bundle": "yarn compile-sass && webpack --config scripts/webpack.prod.js",
+    "clean": "rimraf *.log .eslintcache node_modules/",
+    "clean-install": "yarn clean && yarn"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "dependencies": {
+    "color": "^3.0.0",
+    "hsluv": "^0.0.3",
+    "truesight": "^0.1.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.3",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-syntax-async-generators": "^6.13.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-flow": "^6.23.0",
+    "css-loader": "^0.28.11",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-flowtype": "^2.49.3",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "flow-bin": "^0.75.0",
+    "husky": "^1.0.0-rc.8",
+    "lint-staged": "^7.2.0",
+    "node-sass": "^4.9.0",
+    "prettier": "1.12.1",
+    "rimraf": "^2.6.2",
+    "sass-loader": "^7.0.3",
+    "style-loader": "^0.21.0",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "webpack": "^4.12.0",
+    "webpack-cli": "^3.0.3",
+    "webpack-dev-server": "^3.1.4",
+    "webpack-merge": "^4.1.2"
+  }
+}

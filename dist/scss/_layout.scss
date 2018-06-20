@@ -1,0 +1,106 @@
+@import 'colors';
+
+$content-margin-bottom: 1.67em;
+$content-lr-padding: 1rem;
+$content-tb-padding: 2.33rem;
+
+%inner-content {
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 $content-lr-padding;
+  max-width: 680px;
+
+  &:not(:last-child) {
+    margin-bottom: $content-margin-bottom;
+  }
+}
+
+%caption {
+  font-size: 16px;
+  color: $tertiary-color;
+}
+
+body {
+  font-family: 'PT Sans', sans-serif;
+  background-color: $background-color;
+}
+
+code {
+  font-size: 16px;
+  font-family: 'PT Mono', monospace;
+}
+
+.container {
+  margin: $content-tb-padding auto;
+  max-width: 1090px;
+}
+
+.text-content {
+  @extend %inner-content;
+  font-size: 18px;
+}
+
+.text-content--ref {
+  text-decoration: none;
+  color: $ref-color;
+}
+
+.text-content--quote {
+  font-style: italic;
+}
+
+.media-content {
+  margin-bottom: $content-margin-bottom;
+  text-align: center;
+}
+
+.media-content__image {
+  width: 100%;
+}
+
+.media-content__video {
+  width: 100%;
+  height: auto;
+}
+
+.media-content__caption {
+  margin-top: 0.25em;
+  @extend %caption;
+}
+
+.header {
+  @extend %inner-content;
+  display: flex;
+  align-items: center;
+}
+
+.header__title {
+  margin: 0;
+  flex: 1;
+}
+
+.header__title--color {
+  background-image: linear-gradient(to right, $secondary-color, $primary-color);
+  background-image: -webkit-linear-gradient(to right, $secondary-color, $primary-color);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.header__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.disclaimer {
+  @extend %inner-content;
+  @extend %caption;
+}
+
+.disclaimer__hline {
+  margin-left: 0;
+  width: 100px;
+  height: 1px;
+  border: 0;
+  background-color: $tertiary-color;
+}
