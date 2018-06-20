@@ -1111,6 +1111,7 @@
 
   var index = _extends(
     {
+      RGBColor,
       RGBImage,
     },
     ImageQuantizationAPI,

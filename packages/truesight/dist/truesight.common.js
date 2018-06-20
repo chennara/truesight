@@ -1100,6 +1100,7 @@ var VideoQuantizationAPI = {
 
 var index = _extends(
   {
+    RGBColor,
     RGBImage,
   },
   ImageQuantizationAPI,
