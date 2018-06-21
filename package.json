@@ -3,7 +3,7 @@
   "author": "Chennara Nhes",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint {**/*.js,**/*.md} --cache",
+    "lint": "eslint **/*.js --cache",
     "flow-check": "flow check --include-warnings",
     "test-truesight": "yarn karma start scripts/karma/truesight.karma.config.js",
     "test": "yarn test-truesight",
