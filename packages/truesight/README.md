@@ -1,19 +1,15 @@
 # truesight
 
-[![truesight-version](https://badge.fury.io/js/truesight.svg)](https://badge.fury.io/js/truesight) [![truesight-build-status](https://travis-ci.org/chennara/truesight.svg?branch=master)](https://travis-ci.org/chennara/truesight) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![truesight-version](https://badge.fury.io/js/truesight.svg)](https://badge.fury.io/js/truesight) [![truesight-build-status](https://travis-ci.org/chennara/truesight.svg?branch=master)](https://travis-ci.org/chennara/truesight) [![truesight-license](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A lightweight JavaScript library visualizing color in storytelling. A set of easy to use functions is provided for generating the inverse color maps and color palettes in both images and videos.
-
-## Why?
-
-The truesight [website](https://chennara.github.io/truesight/) demonstrates how you could use the library in the browser. It tries to show how a well-chosen color palette evokes mood and sets the tone in storytelling.
 
 ## Install
 
 Install the truesight package from npm:
 
 ```bash
-yarn install truesight
+yarn add truesight
 ```
 
 ## Usage
