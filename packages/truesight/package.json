@@ -1,6 +1,6 @@
 {
   "name": "truesight",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.1",
   "description": "Visualizing color in storytelling.",
   "author": "Chennara Nhes",
   "license": "MIT",
@@ -10,6 +10,7 @@
     "type": "git",
     "url": "https://github.com/chennara/truesight.git"
   },
+  "keywords": ["color", "storytelling"],
   "dependencies": {
     "hsluv": "^0.0.3"
   }

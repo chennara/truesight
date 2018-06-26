@@ -1,5 +1,5 @@
 /*!
- * truesight.common.js v0.1.0-alpha.1
+ * truesight.common.js v0.1.1
  * Copyright (c) 2018-present, Chennara Nhes.
  * Released under the MIT License.
  */
